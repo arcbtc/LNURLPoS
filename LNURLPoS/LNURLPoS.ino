@@ -8,15 +8,22 @@
 #include "utility/segwit_addr.h"
 #include <Base64.h>
 #include "mbedtls/aes.h"
- 
-////////CHANGE///////
+
+///////////////////////////////////////////////////////
+////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS///////
+///////////////////////////////////////////////////////
 
 char * server = "https://lnbits.com";
 char * posId = "9j309f3f320fm042m3f";
 char * key = "abcdefghijklmnop";
 char * currency = "GBP";
 
-/////////////////////
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
+
+//////////////VARIABLES///////////////////
 
 String dataId = "";
 bool paid = false;
@@ -43,18 +50,19 @@ String randomPin;
 bool settle = false;
 String strAmountPin;
 
-// The custom font file attached to this sketch must be included
 #include "MyFont.h"
 
 #define BIGFONT &FreeMonoBold24pt7b
+#define MIDBIGFONT &FreeMonoBold18pt7b
 #define MIDFONT &FreeMonoBold12pt7b
 #define SMALLFONT &FreeMonoBold9pt7b
 #define TINYFONT &TomThumb
 
-// Use hardware SPI
 TFT_eSPI tft = TFT_eSPI();
 
-//Set keypad
+
+//////////////KEYPAD///////////////////
+
 const byte rows = 4; //four rows
 const byte cols = 3; //three columns
 char keys[rows][cols] = {
@@ -70,13 +78,14 @@ Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, rows, cols );
 int checker = 0;
 char maxdig[20];
 
+
+//////////////MAIN///////////////////
+
 void setup(void) {
-  Serial.begin(115200);
   pinMode (2, OUTPUT);
   digitalWrite(2, HIGH);
   tft.begin();
   tft.setRotation(3);
-
   logo();
   delay(3000);
 }
@@ -90,10 +99,8 @@ void loop() {
    char key = keypad.getKey();
    if (key != NO_KEY){
      virtkey = String(key);
-     Serial.println(virtkey);
        if (virtkey == "#"){
-        
-        encodeEncrypt();
+        prepareAmountPin();
         makeLNURL(String(server) + "/lnurlpos/api/" + String(posId) + "/" + strAmountPin);
         qrShowCode(lnurl);
         int counta = 0;
@@ -125,32 +132,8 @@ void loop() {
   }
 }
 
-//helpers
 
-void to_upper(char * arr){
-  for (size_t i = 0; i < strlen(arr); i++)
-  {
-    if(arr[i] >= 'a' && arr[i] <= 'z'){
-      arr[i] = arr[i] - 'a' + 'A';
-    }
-  }
-}
-
-void makeLNURL(String XXX){
-  char Buf[200];
-  XXX.toCharArray(Buf, 200);
-  char *url = Buf;
-  byte * data = (byte *)calloc(strlen(url)*2, sizeof(byte));
-  size_t len = 0;
-  int res = convert_bits(data, &len, 5, (byte *)url, strlen(url), 8, 1);
-
-  char * charLnurl = (char *)calloc(strlen(url)*2, sizeof(byte));
-  bech32_encode(charLnurl, "lnurl", data, len);
-  to_upper(charLnurl);
-  lnurl = charLnurl;
-}
-
-//display functions
+///////////DISPLAY///////////////
 
 void qrShowCode(String lnurl){
   tft.fillScreen(TFT_WHITE);
@@ -199,9 +182,11 @@ void displaySats(){
   inputs += virtkey;
   float amount = float(inputs.toInt()) / 100;
   tft.setFreeFont(MIDFONT);
-  tft.setTextColor(TFT_RED, TFT_BLACK);
-  tft.setCursor(10, 80);
-  tft.println(String(currency) + ": " + amount);
+  tft.setCursor(0, 80);
+  tft.print(String(currency) + ":");
+  tft.setFreeFont(MIDBIGFONT);
+  tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  tft.println(amount);
   delay(100);
   virtkey = "";
 }
@@ -219,7 +204,34 @@ void logo(){
   tft.print("Powered by LNbits");         // Using tft.print means text background is NEVER rendered
 }
 
-void encodeEncrypt(){
+
+//////////LNURL AND CRYPTO////////////
+
+void to_upper(char * arr){
+  for (size_t i = 0; i < strlen(arr); i++)
+  {
+    if(arr[i] >= 'a' && arr[i] <= 'z'){
+      arr[i] = arr[i] - 'a' + 'A';
+    }
+  }
+}
+
+void makeLNURL(String XXX){
+  char Buf[200];
+  XXX.toCharArray(Buf, 200);
+  char *url = Buf;
+  byte * data = (byte *)calloc(strlen(url)*2, sizeof(byte));
+  size_t len = 0;
+  int res = convert_bits(data, &len, 5, (byte *)url, strlen(url), 8, 1);
+
+  char * charLnurl = (char *)calloc(strlen(url)*2, sizeof(byte));
+  bech32_encode(charLnurl, "lnurl", data, len);
+  to_upper(charLnurl);
+  lnurl = charLnurl;
+}
+
+
+void prepareAmountPin(){
   
   randomPin = String(random(1000,9999));
   String strAmountPin = randomPin + "-" + inputs;
@@ -236,42 +248,18 @@ void encodeEncrypt(){
   unsigned char decipheredTextOutput[16];
 
   encrypt(plainText, key, cipherTextOutput);
-  decrypt(cipherTextOutput, key, decipheredTextOutput);
 
-  Serial.println("\nOriginal plain text:");
-  Serial.println(plainText);
-
-  Serial.println("\nCiphered text:");
   for (int i = 0; i < 16; i++) {
     char str[3];
     sprintf(str, "%02x", (int)cipherTextOutput[i]);
-    Serial.print(str);
     strAmountPin = strAmountPin + str;
   }
-
-  Serial.println("\n\nDeciphered text:");
-  for (int i = 0; i < 16; i++) {
-    Serial.print((char)decipheredTextOutput[i]);
-  }
-
 }
 
 void encrypt(char * plainText, char * key, unsigned char * outputBuffer){
-
   mbedtls_aes_context aes;
-
   mbedtls_aes_init( &aes );
   mbedtls_aes_setkey_enc( &aes, (const unsigned char*) key, strlen(key) * 8 );
   mbedtls_aes_crypt_ecb( &aes, MBEDTLS_AES_ENCRYPT, (const unsigned char*)plainText, outputBuffer);
-  mbedtls_aes_free( &aes );
-}
-
-void decrypt(unsigned char * chipherText, char * key, unsigned char * outputBuffer){
-
-  mbedtls_aes_context aes;
-
-  mbedtls_aes_init( &aes );
-  mbedtls_aes_setkey_dec( &aes, (const unsigned char*) key, strlen(key) * 8 );
-  mbedtls_aes_crypt_ecb(&aes, MBEDTLS_AES_DECRYPT, (const unsigned char*)chipherText, outputBuffer);
   mbedtls_aes_free( &aes );
 }
