@@ -101,7 +101,7 @@ void loop() {
      virtkey = String(key);
        if (virtkey == "#"){
         prepareAmountPin();
-        makeLNURL(String(server) + "/lnurlpos/api/" + String(posId) + "/" + strAmountPin);
+        makeLNURL(String(server) + "/lnurlpos/api/v1/lnurl/" + String(posId) + "/" + strAmountPin);
         qrShowCode(lnurl);
         int counta = 0;
          while (settle != true){
