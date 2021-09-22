@@ -6,12 +6,15 @@
 #include "qrcode.h"
 #include "Bitcoin.h"
 #include "utility/segwit_addr.h"
-
+#include <Base64.h>
+#include "mbedtls/aes.h"
+ 
 ////////CHANGE///////
 
-String lnbits = "https://lnbits.com";
-String posId = "9j309f3f320fm042m3f";
-String posSecret = "f234gf3rg3rwg3rg3";
+char * server = "https://lnbits.com";
+char * posId = "9j309f3f320fm042m3f";
+char * key = "abcdefghijklmnop";
+char * currency = "GBP";
 
 /////////////////////
 
@@ -38,6 +41,7 @@ String virtkey;
 String payreq;
 String randomPin;
 bool settle = false;
+String strAmountPin;
 
 // The custom font file attached to this sketch must be included
 #include "MyFont.h"
@@ -88,8 +92,9 @@ void loop() {
      virtkey = String(key);
      Serial.println(virtkey);
        if (virtkey == "#"){
-        randomPin = String(random(1000,9999));
-        makeLNURL(lnbits + "/lnurlpos/api/" + posId + "/" + randomPin + "/" + inputs);
+        
+        encodeEncrypt();
+        makeLNURL(String(server) + "/lnurlpos/api/" + String(posId) + "/" + strAmountPin);
         qrShowCode(lnurl);
         int counta = 0;
          while (settle != true){
@@ -193,10 +198,10 @@ void displaySats(){
   
   inputs += virtkey;
   float amount = float(inputs.toInt()) / 100;
-  tft.setFreeFont(BIGFONT);
+  tft.setFreeFont(MIDFONT);
   tft.setTextColor(TFT_RED, TFT_BLACK);
   tft.setCursor(10, 80);
-  tft.println(amount);
+  tft.println(String(currency) + ": " + amount);
   delay(100);
   virtkey = "";
 }
@@ -212,4 +217,61 @@ void logo(){
   tft.setFreeFont(SMALLFONT);
   tft.setCursor(42,90);       // To be compatible with Adafruit_GFX the cursor datum is always bottom left
   tft.print("Powered by LNbits");         // Using tft.print means text background is NEVER rendered
+}
+
+void encodeEncrypt(){
+  
+  randomPin = String(random(1000,9999));
+  String strAmountPin = randomPin + "-" + inputs;
+  int inputStringLength = strAmountPin.length() +1;
+  char str_array[inputStringLength];
+  strAmountPin.toCharArray(str_array, inputStringLength);
+  char* plainText = strtok(str_array, " ");
+  plainText[sizeof(plainText) + 1] = '8';
+  for (int i = 5 + sizeof(plainText); i < 16; i++)
+    {
+      plainText[i] = '0';
+    }
+  unsigned char cipherTextOutput[16];
+  unsigned char decipheredTextOutput[16];
+
+  encrypt(plainText, key, cipherTextOutput);
+  decrypt(cipherTextOutput, key, decipheredTextOutput);
+
+  Serial.println("\nOriginal plain text:");
+  Serial.println(plainText);
+
+  Serial.println("\nCiphered text:");
+  for (int i = 0; i < 16; i++) {
+    char str[3];
+    sprintf(str, "%02x", (int)cipherTextOutput[i]);
+    Serial.print(str);
+    strAmountPin = strAmountPin + str;
+  }
+
+  Serial.println("\n\nDeciphered text:");
+  for (int i = 0; i < 16; i++) {
+    Serial.print((char)decipheredTextOutput[i]);
+  }
+
+}
+
+void encrypt(char * plainText, char * key, unsigned char * outputBuffer){
+
+  mbedtls_aes_context aes;
+
+  mbedtls_aes_init( &aes );
+  mbedtls_aes_setkey_enc( &aes, (const unsigned char*) key, strlen(key) * 8 );
+  mbedtls_aes_crypt_ecb( &aes, MBEDTLS_AES_ENCRYPT, (const unsigned char*)plainText, outputBuffer);
+  mbedtls_aes_free( &aes );
+}
+
+void decrypt(unsigned char * chipherText, char * key, unsigned char * outputBuffer){
+
+  mbedtls_aes_context aes;
+
+  mbedtls_aes_init( &aes );
+  mbedtls_aes_setkey_dec( &aes, (const unsigned char*) key, strlen(key) * 8 );
+  mbedtls_aes_crypt_ecb(&aes, MBEDTLS_AES_DECRYPT, (const unsigned char*)chipherText, outputBuffer);
+  mbedtls_aes_free( &aes );
 }
