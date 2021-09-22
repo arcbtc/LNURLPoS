@@ -7,16 +7,18 @@
 #include "Bitcoin.h"
 #include "utility/segwit_addr.h"
 #include <Base64.h>
+#include <Hash.h>  // all single-line hashing algorithms
+#include <Conversion.h> // to print byte arrays in hex format
 #include "mbedtls/aes.h"
 
 ///////////////////////////////////////////////////////
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS///////
 ///////////////////////////////////////////////////////
 
-char * server = "https://lnbits.com";
-char * posId = "9j309f3f320fm042m3f";
-char * key = "abcdefghijklmnop";
-char * currency = "GBP";
+String server = "https://lnbits.com";
+String posId = "9j309f3f320fm042m3f";
+String key = "abcdefghijklmnop";
+String currency = "GBP";
 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
@@ -48,7 +50,7 @@ String virtkey;
 String payreq;
 String randomPin;
 bool settle = false;
-String strAmountPin;
+String preparedURL;
 
 #include "MyFont.h"
 
@@ -59,7 +61,7 @@ String strAmountPin;
 #define TINYFONT &TomThumb
 
 TFT_eSPI tft = TFT_eSPI();
-
+SHA256 h;
 
 //////////////KEYPAD///////////////////
 
@@ -82,8 +84,10 @@ char maxdig[20];
 //////////////MAIN///////////////////
 
 void setup(void) {
+  Serial.begin(115200);
   pinMode (2, OUTPUT);
   digitalWrite(2, HIGH);
+  h.begin();
   tft.begin();
   tft.setRotation(3);
   logo();
@@ -100,8 +104,8 @@ void loop() {
    if (key != NO_KEY){
      virtkey = String(key);
        if (virtkey == "#"){
-        prepareAmountPin();
-        makeLNURL(String(server) + "/lnurlpos/api/v1/lnurl/" + String(posId) + "/" + strAmountPin);
+        prepareURL();
+        makeLNURL(preparedURL);
         qrShowCode(lnurl);
         int counta = 0;
          while (settle != true){
@@ -204,9 +208,6 @@ void logo(){
   tft.print("Powered by LNbits");         // Using tft.print means text background is NEVER rendered
 }
 
-
-//////////LNURL AND CRYPTO////////////
-
 void to_upper(char * arr){
   for (size_t i = 0; i < strlen(arr); i++)
   {
@@ -215,6 +216,10 @@ void to_upper(char * arr){
     }
   }
 }
+
+
+//////////LNURL AND CRYPTO///////////////
+////VERY KINDLY DONATED BY SNIGIREV!/////
 
 void makeLNURL(String XXX){
   char Buf[200];
@@ -230,36 +235,29 @@ void makeLNURL(String XXX){
   lnurl = charLnurl;
 }
 
-
-void prepareAmountPin(){
-  
+void prepareURL(){
   randomPin = String(random(1000,9999));
-  String strAmountPin = randomPin + "-" + inputs;
-  int inputStringLength = strAmountPin.length() +1;
-  char str_array[inputStringLength];
-  strAmountPin.toCharArray(str_array, inputStringLength);
-  char* plainText = strtok(str_array, " ");
-  plainText[sizeof(plainText) + 1] = '8';
-  for (int i = 5 + sizeof(plainText); i < 16; i++)
-    {
-      plainText[i] = '0';
-    }
-  unsigned char cipherTextOutput[16];
-  unsigned char decipheredTextOutput[16];
-
-  encrypt(plainText, key, cipherTextOutput);
-
-  for (int i = 0; i < 16; i++) {
-    char str[3];
-    sprintf(str, "%02x", (int)cipherTextOutput[i]);
-    strAmountPin = strAmountPin + str;
-  }
+  byte nonce[16];
+  byte payload[32];
+  memset(nonce, 0x55, 16);
+  encode_data(payload, nonce, randomPin, inputs);
+  preparedURL = server + "/lnurlpos/api/v1/lnurl/";
+  preparedURL += toHex(nonce, 16);
+  preparedURL += "/";
+  preparedURL += toHex(payload, 32);
+  preparedURL += "/";
+  preparedURL += posId;
 }
 
-void encrypt(char * plainText, char * key, unsigned char * outputBuffer){
-  mbedtls_aes_context aes;
-  mbedtls_aes_init( &aes );
-  mbedtls_aes_setkey_enc( &aes, (const unsigned char*) key, strlen(key) * 8 );
-  mbedtls_aes_crypt_ecb( &aes, MBEDTLS_AES_ENCRYPT, (const unsigned char*)plainText, outputBuffer);
-  mbedtls_aes_free( &aes );
+void encode_data(byte output[32], byte nonce[16], int pin, int amount_in_cents){
+  SHA256 h;
+  h.write(nonce, 16);
+  h.write((byte *)shared_secret.c_str(), shared_secret.length());
+  h.end(output);
+  output[0] = output[0] ^ ((byte)(pin & 0xFF));
+  output[1] = output[1] ^ ((byte)(pin >> 8));
+  for(int i=0; i<4; i++){
+    output[2+i] = output[2+i] ^ ((byte)(amount_in_cents & 0xFF));
+    amount_in_cents = amount_in_cents >> 8;
+  }
 }
