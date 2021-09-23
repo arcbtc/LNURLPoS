@@ -13,7 +13,7 @@
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-String server = "https://esp32.ngrok.io";
+String server = "https://lnbits.comn";
 String posId = "dwKhbkWEEBgpw7Frz93y4S";
 String key = "mJwMq8rcnA9dY2fiRcTdtF";
 String currency = "USD";
