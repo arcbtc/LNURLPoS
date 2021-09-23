@@ -5,25 +5,22 @@
 #include <string.h>
 #include "qrcode.h"
 #include "Bitcoin.h"
-#include "utility/segwit_addr.h"
 #include <Base64.h>
-#include <Hash.h>  // all single-line hashing algorithms
-#include <Conversion.h> // to print byte arrays in hex format
-#include "mbedtls/aes.h"
+#include <Hash.h>
+#include <Conversion.h>
 
-///////////////////////////////////////////////////////
-////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS///////
-///////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
+////////////////////////////////////////////////////////
 
-String server = "https://lnbits.com";
-String posId = "9j309f3f320fm042m3f";
-String key = "abcdefghijklmnop";
-String currency = "GBP";
+String server = "https://esp32.ngrok.io";
+String posId = "dwKhbkWEEBgpw7Frz93y4S";
+String key = "mJwMq8rcnA9dY2fiRcTdtF";
+String currency = "USD";
 
-///////////////////////////////////////////////////////
-///////////////////////////////////////////////////////
-///////////////////////////////////////////////////////
-
+////////////////////////////////////////////////////////
+/////Note: ee lines 75, 97, to adjust to keypad size////
+////////////////////////////////////////////////////////
 
 //////////////VARIABLES///////////////////
 
@@ -48,7 +45,7 @@ String nosats;
 float conversion;
 String virtkey;
 String payreq;
-String randomPin;
+int randomPin;
 bool settle = false;
 String preparedURL;
 
@@ -73,9 +70,15 @@ char keys[rows][cols] = {
   {'7','8','9'},
   {'*','0','#'}
 };
-//21 22 17
-byte rowPins[rows] = {12, 13, 15, 2}; //connect to the row pinouts of the keypad
-byte colPins[cols] = {17, 22, 21}; //connect to the column pinouts of the keypad
+
+//Big keypad setup
+//byte rowPins[rows] = {12, 13, 15, 2}; //connect to the row pinouts of the keypad
+//byte colPins[cols] = {17, 22, 21}; //connect to the column pinouts of the keypad
+
+//Small keypad setup
+byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
+byte colPins[cols] = {15, 13, 12}; //connect to the column pinouts of the keypad
+
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, rows, cols );
 int checker = 0;
 char maxdig[20];
@@ -89,7 +92,9 @@ void setup(void) {
   digitalWrite(2, HIGH);
   h.begin();
   tft.begin();
-  tft.setRotation(3);
+  
+  //Set to 3 for bigger keypad
+  tft.setRotation(1);
   logo();
   delay(3000);
 }
@@ -104,9 +109,8 @@ void loop() {
    if (key != NO_KEY){
      virtkey = String(key);
        if (virtkey == "#"){
-        prepareURL();
-        makeLNURL(preparedURL);
-        qrShowCode(lnurl);
+        makeLNURL();
+        qrShowCode();
         int counta = 0;
          while (settle != true){
            virtkey = String(keypad.getKey());
@@ -139,7 +143,7 @@ void loop() {
 
 ///////////DISPLAY///////////////
 
-void qrShowCode(String lnurl){
+void qrShowCode(){
   tft.fillScreen(TFT_WHITE);
   lnurl.toUpperCase();
   const char* lnurlChar = lnurl.c_str();
@@ -221,38 +225,38 @@ void to_upper(char * arr){
 //////////LNURL AND CRYPTO///////////////
 ////VERY KINDLY DONATED BY SNIGIREV!/////
 
-void makeLNURL(String XXX){
+void makeLNURL(){
+  randomPin = random(1000,9999);
+  byte nonce[8];
+  for(int i = 0; i < 8;i++){
+    nonce[i] = random(9);
+  }
+  byte payload[8];
+  encode_data(payload, nonce, randomPin, inputs.toInt());
+  preparedURL = server + "/lnurlpos/api/v1/lnurl/";
+  preparedURL += toHex(nonce,8);
+  preparedURL += "/";
+  preparedURL += toHex(payload, 8);
+  preparedURL += "/";
+  preparedURL += posId;
+  Serial.println(preparedURL);
   char Buf[200];
-  XXX.toCharArray(Buf, 200);
+  preparedURL.toCharArray(Buf, 200);
   char *url = Buf;
   byte * data = (byte *)calloc(strlen(url)*2, sizeof(byte));
   size_t len = 0;
   int res = convert_bits(data, &len, 5, (byte *)url, strlen(url), 8, 1);
-
   char * charLnurl = (char *)calloc(strlen(url)*2, sizeof(byte));
   bech32_encode(charLnurl, "lnurl", data, len);
   to_upper(charLnurl);
   lnurl = charLnurl;
+  Serial.println(lnurl);
 }
 
-void prepareURL(){
-  randomPin = String(random(1000,9999));
-  byte nonce[16];
-  byte payload[32];
-  memset(nonce, 0x55, 16);
-  encode_data(payload, nonce, randomPin, inputs);
-  preparedURL = server + "/lnurlpos/api/v1/lnurl/";
-  preparedURL += toHex(nonce, 16);
-  preparedURL += "/";
-  preparedURL += toHex(payload, 32);
-  preparedURL += "/";
-  preparedURL += posId;
-}
-
-void encode_data(byte output[32], byte nonce[16], int pin, int amount_in_cents){
+void encode_data(byte output[8], byte nonce[8], int pin, int amount_in_cents){
   SHA256 h;
-  h.write(nonce, 16);
-  h.write((byte *)shared_secret.c_str(), shared_secret.length());
+  h.write(nonce, 8);
+  h.write((byte *)key.c_str(), key.length());
   h.end(output);
   output[0] = output[0] ^ ((byte)(pin & 0xFF));
   output[1] = output[1] ^ ((byte)(pin >> 8));
