@@ -37,5 +37,5 @@ Fiatjafs incredible <a href="https://github.com/lnbits/lnbits/tree/master/lnbits
 
 Included are 2 lightburn files, one for the standard membrane keypads, the other for the less standard and smaller membrane keypads.
 
-<imbg src="https://user-images.githubusercontent.com/33088785/134682332-991bb42e-36cf-4fad-8cf4-6a607f39143f.png" style="width:50%">
+<img src="https://user-images.githubusercontent.com/33088785/134682332-991bb42e-36cf-4fad-8cf4-6a607f39143f.png" style="width:50%">
 
