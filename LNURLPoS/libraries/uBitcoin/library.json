@@ -1,0 +1,25 @@
+{
+  "name": "uBitcoin",
+  "version": "0.1.1",
+  "description": "Brings Bitcoin to embedded devices. Write your own hardware wallet, vending machine or any other bitcoin-powered device. Supports public and private keys, HD wallets, transactions and scripts. Everything required to start working with Bitcoin on microcontrollers.",
+  "keywords": "bitcoin, cryptography",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/micro-bitcoin/uBitcoin.git"
+  },
+  "authors":
+  [
+    {
+      "name": "Stepan Snigirev",
+      "email": "snigirev.stepan@gmail.com",
+      "url": "https://stepansnigirev.com"
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://micro-bitcoin.github.io",
+  "dependencies": {
+  },
+  "frameworks": "*",
+  "platforms": "*"
+}
