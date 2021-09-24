@@ -12,7 +12,7 @@ LNURLPoS uses the LNURL-pay protocol. LNURL-pay allows your lightning-wallet to 
 
 ![image](https://user-images.githubusercontent.com/33088785/134657379-bd9e18f0-0289-498b-a1fc-c084c60e64e3.png)
 
-For online stuff I suppose massive QR codes are not an issue, but when fiddling with hardware devices they are. By LNURLPoS using the lNURL-pay protocol, it can use a smaller screen for displaying the QR.
+For online stuff I suppose massive QR codes are not an issue, but when fiddling with hardware devices they are. LNURLPoS using the LNURL-pay protocol, it can use a smaller screen for displaying the QR.
 
 ## Setup workflow
 
@@ -22,7 +22,7 @@ For online stuff I suppose massive QR codes are not an issue, but when fiddling 
 ## Payment workflow
 
 * Merchant enters amount into LNURLPoS device
-* LNURL is generated in device and displayed for scanning (LNURL includes a unique pin encrypted using the shared key)
+* LNURL is generated in device and displayed for scanning (LNURL includes a unique pin encrypted using the secret key shared with the server)
 * Customer scans and pays
 * When the payment has cleared the customer is sent the decrypted unique pin
 * Merchant can compare and verify using the same pin displayed on the lNURLPoS
