@@ -55,10 +55,10 @@ If you want to make your own stand-alone server software that would be fairly ea
 
 There are 2 lightburn designs for cases depending on membrane keypads. Designs use layered 3mm acrylic and M4 nuts/bolts <br/>(Blue = fill/engrave 1.5mm depth, Black = cut)
 
-<p align="left">
+<p align="center">
 <img src="https://user-images.githubusercontent.com/33088785/134682332-991bb42e-36cf-4fad-8cf4-6a607f39143f.png" style="width:48%; height: 100%">
 </p>
-<p align="right">
+<p align="center">
 <img src="https://user-images.githubusercontent.com/33088785/134685048-bba3c43f-a454-4459-a6e9-211a60c70ff1.gif" style="width:48%; height: 50%">
 </p>
 <br/><br/>
