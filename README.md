@@ -42,7 +42,7 @@ There are 2 lightburn designs for cases depending on membrane keypads. Bot hdesi
 <div>
 <img src="https://user-images.githubusercontent.com/33088785/134682332-991bb42e-36cf-4fad-8cf4-6a607f39143f.png" style="width:48%; height: 100%" align="left">
 
-<img src="https://user-images.githubusercontent.com/33088785/134685048-bba3c43f-a454-4459-a6e9-211a60c70ff1.gif" style="width:48%; height: 100%" align="right">
+<img src="https://user-images.githubusercontent.com/33088785/134685048-bba3c43f-a454-4459-a6e9-211a60c70ff1.gif" style="width:48%; height: 50%" align="right">
   </div>
 <br/>
 Laser cutters are cheap now and should be part of every makers arsnal, these examples were cut on £200 NEJE Master2s 20W, alternatively there are plenty of laser engraving/cutting companies.
