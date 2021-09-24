@@ -1,5 +1,5 @@
 # LNURLPoS
-## Offline DIY, cheap bitcoin lightning-network PoS
+## Cheap, offline, DIY bitcoin lightning-network PoS
 
 ![lnurlpos](https://user-images.githubusercontent.com/33088785/134704675-0db75723-3da9-430d-b5fa-738880961305.png)
 
