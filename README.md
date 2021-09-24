@@ -30,3 +30,12 @@ For online stuff I suppose massive QR codes are not an issue, but when fiddling 
 ### Credit/props
 
 Fiatjafs incredible <a href="https://github.com/lnbits/lnbits/tree/master/lnbits/extensions/offlineshop">OfflineShop</a> extension. LNURLPoS is the same concept, but can run at scale, and is dependent on a device. 
+
+# LNURLPoS Tutorial
+
+## Case
+
+Included are 2 lightburn files, one for the standard membrane keypads, the other for the less standard and smaller membrane keypads.
+
+![Screenshot from 2021-09-24 14-28-18](https://user-images.githubusercontent.com/33088785/134682332-991bb42e-36cf-4fad-8cf4-6a607f39143f.png =250x)
+
