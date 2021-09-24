@@ -37,7 +37,7 @@ Fiatjafs incredible <a href="https://github.com/lnbits/lnbits/tree/master/lnbits
 
 ## Case
 
-There are 2 lightburn designs for cases depending on membrane keypads. Bot hdesigns use layered 3mm acrylic and M4 nuts/bolts (Blue = fill/engrave 1.5mm depth, Black = cut)
+There are 2 lightburn designs for cases depending on membrane keypads. Bot hdesigns use layered 3mm acrylic and M4 nuts/bolts <br/>(Blue = fill/engrave 1.5mm depth, Black = cut)
 
 <div>
 <img src="https://user-images.githubusercontent.com/33088785/134682332-991bb42e-36cf-4fad-8cf4-6a607f39143f.png" style="width:48%; height: 100%" align="left">
