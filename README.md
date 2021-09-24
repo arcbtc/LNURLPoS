@@ -35,6 +35,18 @@ Fiatjafs incredible <a href="https://github.com/lnbits/lnbits/tree/master/lnbits
 
 # LNURLPoS Tutorial
 
+
+## Arduino software
+
+* Download/install latest <a href="https://www.arduino.cc/en/software">Arduino IDE</a>
+* Install ESP32 boards, using <a href="https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html#installing-using-boards-manager">boards manager</a>
+* Copy these libraries into your Arduino IDE library folder
+
+## LNbits extension
+
+To make things easy (usually a few clicks on things like Raspiblitz), there is an <a href="https://github.com/lnbits/lnbits/tree/master/lnbits/extensions/lnurlpos">LNbits extension</a>.
+If you want to make your own standalone server software that would be fairly easy to do, by replicating the lnurl.py file in the extennsion.
+
 ## Case
 
 There are 2 lightburn designs for cases depending on membrane keypads. Bot hdesigns use layered 3mm acrylic and M4 nuts/bolts <br/>(Blue = fill/engrave 1.5mm depth, Black = cut)
@@ -47,4 +59,5 @@ There are 2 lightburn designs for cases depending on membrane keypads. Bot hdesi
 <br/><br/>
 Laser cutters are cheap now and should be part of every makers arsnal, these examples were cut on £200 NEJE Master2s 20W, alternatively there are plenty of laser engraving/cutting companies.
 <br/><br/>
-qwev
+
+
