@@ -45,7 +45,7 @@ Fiatjafs incredible <a href="https://github.com/lnbits/lnbits/tree/master/lnbits
 * Download/install latest <a href="https://www.arduino.cc/en/software">Arduino IDE</a>
 * Install ESP32 boards, using <a href="https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html#installing-using-boards-manager">boards manager</a>
 * Copy <a href="https://github.com/arcbtc/LNURLPoS/tree/main/LNURLPoS/libraries">these libraries</a> into your Arduino IDE library folder
-* Plug in T-Display, from Tools>Board>ESP32 Boards select **TTGO LoRa32 OLED V1**
+* Plug in T-Display, from *Tools>Board>ESP32 Boards* select **TTGO LoRa32 OLED V1**
 ## LNbits extension
 
 To make things easy (usually a few clicks on things like Raspiblitz), there is an <a href="https://github.com/lnbits/lnbits/tree/master/lnbits/extensions/lnurlpos">LNbits extension</a>.
