@@ -10,5 +10,7 @@ Lightning-network uses a hot wallets, so all real-world payments are made from p
 
 LNURLPoS uses the LNURL-pay protocol. LNURL-pay allows your lightning-wallet to make a secure request to a server to get a lightning-network invoice. So instead of scanning a massive ugly lightning-network invoice QR, you can scan a lovely little LNURL QR (if you <a href="https://lnurl.fiatjaf.com/codec/">decode</a> an LNURL you'll see its just a URL).  
 
-![image](https://user-images.githubusercontent.com/33088785/134657169-fa574193-480d-47d7-a050-8e1e477f0938.png)
+![image](https://user-images.githubusercontent.com/33088785/134657379-bd9e18f0-0289-498b-a1fc-c084c60e64e3.png)
+
+For online stuff I suppose massive QR codes are not an issue, but for me fiddling with devices they are. By LNURLPoS using the lNURL-pay protocol, it can also use a smaller screen for displaying the QR.
 
