@@ -1,7 +1,7 @@
 # LNURLPoS
 ## Offline lightning PoS
 
-As bicoin lightning-network use a hot wallet, all real-world payments are made from phones. The burden of connectivity can be taken away from the point-of-sale and given to the phone.
+Lightning-network uses a hot wallets, so all real-world payments are made from phones. The burden of connectivity can be taken away from the point-of-sale and given to the phone.
 
 <i>For a traditional PoS experience see my <a href="https://github.com/arcbtc/LNPoS">LNPoS project</a>.</i>
 
