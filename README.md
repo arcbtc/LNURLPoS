@@ -29,6 +29,8 @@ For online stuff I suppose massive QR codes are not an issue, but when fiddling 
 
 ### Credit/props
 
+Stepan Snigerev for creating beautiful crypto and LNURL encoding functions.
+
 Fiatjafs incredible <a href="https://github.com/lnbits/lnbits/tree/master/lnbits/extensions/offlineshop">OfflineShop</a> extension. LNURLPoS is the same concept, but can run at scale, and is dependent on a device. 
 
 # LNURLPoS Tutorial
@@ -42,4 +44,5 @@ There are 2 lightburn designs for cases depending on membrane keypads. Bot hdesi
 
 Laser cutters are cheap now and should be part of every makers arsnal, these examples were cut on £200 NEJE Master2s 20W, alternatively there are plenty of laser engraving/cutting companies.
 
+<img src="https://user-images.githubusercontent.com/33088785/134685048-bba3c43f-a454-4459-a6e9-211a60c70ff1.gif" style="width:50%" align="left">
 
