@@ -26,3 +26,7 @@ For online stuff I suppose massive QR codes are not an issue, but when fiddling 
 * Customer scans and pays
 * When the payment has cleared the customer is sent the decrypted unique pin
 * Merchant can compare and verify using the same pin displayed on the lNURLPoS
+
+## Credit/props
+
+The incredible <a href="https://github.com/lnbits/lnbits/tree/master/lnbits/extensions/offlineshop">OfflineShop</a> extension. LNURLPoS is the same concept, but can run at scale, and is dependent on a device. 
