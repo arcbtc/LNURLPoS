@@ -56,7 +56,7 @@ If you want to make your own stand-alone server software that would be fairly ea
 
 ## Case
 
-Recycle the T-Display case, as with the smaller keypad it all fits together perfectly. See video tutorial.
+Recycle the T-Display case, as with the smaller keypad it all fits together perfectly. See <a href="https://twitter.com/arcbtc/status/1442511015669809152">demo</a>
 
 Alternatively, there are 2 lightburn designs for cases depending on membrane keypads. Designs use layered 3mm acrylic and M4 nuts/bolts <br/>(Blue = fill/engrave 1.5mm depth, Black = cut)
 <p align="center">
