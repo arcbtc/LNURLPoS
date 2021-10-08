@@ -36,6 +36,8 @@ Stepan Snigerev for creating beautiful crypto and LNURL encoding functions.
 
 Fiatjafs incredible <a href="https://github.com/lnbits/lnbits/tree/master/lnbits/extensions/offlineshop">OfflineShop</a> extension. LNURLPoS is the same concept, but can run at scale, and is dependent on a device. 
 
+<a href="https://www.bleskomat.com/">Belskomat</a> for pironeering the idea of a shared secret for the microcontroller to encrypt data with. 
+
 # ⚡⚡⚡⚡⚡⚡ LNURLPoS Tutorial ⚡⚡⚡⚡⚡⚡
 
 ## Hardware needed
