@@ -40,7 +40,7 @@ Fiatjafs incredible <a href="https://github.com/lnbits/lnbits/tree/master/lnbits
 
 # ⚡⚡⚡⚡⚡⚡ LNURLPoS Tutorial ⚡⚡⚡⚡⚡⚡
 
-<a target="_blank" href="https://www.youtube.com/watch?v=ofCv2cHZ5b0"><img src="https://user-images.githubusercontent.com/33088785/136672544-658d7fdc-2ed4-4442-9536-eaa3eeaf613a.png"></a>
+<a href="https://www.youtube.com/watch?v=ofCv2cHZ5b0&list=PLPj3KCksGbSYcLQoQbRGAtuHnQ4U4mXeL&index=38" target="_blank" ><img src="https://user-images.githubusercontent.com/33088785/136672544-658d7fdc-2ed4-4442-9536-eaa3eeaf613a.png"></a>
   
 ## Hardware needed
 
