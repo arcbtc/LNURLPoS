@@ -46,6 +46,7 @@ Fiatjafs incredible <a href="https://github.com/lnbits/lnbits/tree/master/lnbits
 
 * <a href="https://www.aliexpress.com/item/33048962331.html">Lilygo TTGO T-Display</a>
 * Keypad membrane (these <a href="https://www.aliexpress.com/item/32812109541.html">big</a> ones are easy to find, these <a href="https://www.aliexpress.com/item/1005003263865347.html">smaller</a> ones will be used for workshops by arcbtc).
+* <a href="https://www.amazon.co.uk/Sourcingmap-2x40-Pins-Connector-Arduino-Prototype-Black-Silver-Tone/dp/B07DK532DP/ref=sr_1_1_sspa?dchild=1&keywords=angled+gpio+pins&qid=1633810409&sr=8-1-spons&psc=1&smid=AIF4G7PLKBOZY&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUEzQTVQOFdIWUVaMFBBJmVuY3J5cHRlZElkPUEwMTgzMjU2Mk40RUlST0pQRlRVOCZlbmNyeXB0ZWRBZElkPUEwMzQ3MTM3WlBPNEgxSjFKMEFRJndpZGdldE5hbWU9c3BfYXRmJmFjdGlvbj1jbGlja1JlZGlyZWN0JmRvTm90TG9nQ2xpY2s9dHJ1ZQ==">Angled male/male GPIO pins</a>
 
 ## Arduino software install
 
