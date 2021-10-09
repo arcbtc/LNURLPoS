@@ -39,6 +39,8 @@ Fiatjafs incredible <a href="https://github.com/lnbits/lnbits/tree/master/lnbits
 <a href="https://www.bleskomat.com/">Belskomat</a> for pironeering the idea of a shared secret for the microcontroller to encrypt data with. 
 
 # ⚡⚡⚡⚡⚡⚡ LNURLPoS Tutorial ⚡⚡⚡⚡⚡⚡
+<a href="https://www.youtube.com/watch?v=ofCv2cHZ5b0"><img src="https://user-images.githubusercontent.com/33088785/136672507-9fa81efc-f6b7-4912-9fb3-565a9c344722.png"></a>
+
 
 ## Hardware needed
 
