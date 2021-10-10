@@ -72,7 +72,12 @@ Alternatively, there are 2 lightburn designs for cases depending on membrane key
 Laser cutters are cheap now and should be part of every makers arsenal, these examples were cut on £200 NEJE Master2s 20W, alternatively there are plenty of laser engraving/cutting companies.
 <br/><br/>
 
-## Deeper Dive
+### Future updates 
+At the beginning of this article I said "LNURLPoS (currently) only uses LNURL-Pay". The next stage will be for the PoS to also create LNURL-Withdraws, which are essentially faucets. This means merchants can offer refunds, and also sell bitcoin over the counter, which creates an extremely powerful tool for local economies on-ramping and off-ramping from their local fiat currency.
+
+At Adopting Bitcoin in San Salvador I will distribute 40 kits over x2 workshops, so hopefully some locals will start producing, selling and teaching others how to make these useful little units.
+
+## ⚠️⚠️⚠️Deeper Dive⚠️⚠️⚠️
 
 ### LNURL
 
@@ -154,10 +159,5 @@ When that first GET request happens from the wallet, the LNURL server can find t
 If the invoice passed to the wallet is paid the customer is given access to the decrypted pin. 
 
 <img style="width:40%" src="https://user-images.githubusercontent.com/33088785/136544780-10f19ab3-ee47-4b46-aa40-7d983dbf14a8.png">
-
-### Future updates 
-At the beginning of this article I said "LNURLPoS (currently) only uses LNURL-Pay". The next stage will be for the PoS to also create LNURL-Withdraws, which are essentially faucets. This means merchants can offer refunds, and also sell bitcoin over the counter, which creates an extremely powerful tool for local economies on-ramping and off-ramping from their local fiat currency.
-
-At Adopting Bitcoin in San Salvador I will distribute 40 kits over x2 workshops, so hopefully some locals will start producing, selling and teaching others how to make these useful little units.
 
 
