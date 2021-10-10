@@ -77,6 +77,8 @@ At the beginning of this article I said "LNURLPoS (currently) only uses LNURL-Pa
 
 At Adopting Bitcoin in San Salvador I will distribute 40 kits over x2 workshops, so hopefully some locals will start producing, selling and teaching others how to make these useful little units.
 
+---
+
 ## Deeper Dive
 
 ### LNURL
