@@ -75,6 +75,10 @@ char keys[rows][cols] = {
 //byte rowPins[rows] = {12, 13, 15, 2}; //connect to the row pinouts of the keypad
 //byte colPins[cols] = {17, 22, 21}; //connect to the column pinouts of the keypad
 
+// 4 x 4 keypad setup
+//byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
+//byte colPins[cols] = {15, 13, 12}; //connect to the column pinouts of the keypad
+
 //Small keypad setup
 byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
 byte colPins[cols] = {15, 13, 12}; //connect to the column pinouts of the keypad
