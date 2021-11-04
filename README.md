@@ -54,23 +54,14 @@ Fiatjafs incredible <a href="https://github.com/lnbits/lnbits/tree/master/lnbits
 * Install ESP32 boards, using <a href="https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html#installing-using-boards-manager">boards manager</a>
 * Copy <a href="https://github.com/arcbtc/LNURLPoS/tree/main/LNURLPoS/libraries">these libraries</a> into your Arduino IDE library folder
 * Plug in T-Display, from *Tools>Board>ESP32 Boards* select **TTGO LoRa32 OLED V1**
+
+> *Note: If using MacOS, you will need the CP210x USB to UART Bridge VCP Drivers available here https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers*
+
 > *Note: You may need to roll your ESP32 boards back to an earlier version in the Arduino IDE, by using tools>boards>boards manager, searching for esp. I use v1.0.5(rc6), and have also used v1.0.4 which worked.*
 ### LNbits extension
 
 To make things easy (usually a few clicks on things like Raspiblitz), there is an <a href="https://github.com/lnbits/lnbits/tree/master/lnbits/extensions/lnurlpos">LNbits extension</a>.
 If you want to make your own stand-alone server software that would be fairly easy to do, by replicating the lnurl.py file in the extennsion.
-
-### Case
-
-Recycle the T-Display case, as with the smaller keypad it all fits together perfectly. See <a href="https://twitter.com/arcbtc/status/1442511015669809152">demo</a>
-
-Alternatively, there are 2 lightburn designs for cases depending on membrane keypads. Designs use layered 3mm acrylic and M4 nuts/bolts <br/>(Blue = fill/engrave 1.5mm depth, Black = cut)
-<p align="center">
-<img src="https://user-images.githubusercontent.com/33088785/134685048-bba3c43f-a454-4459-a6e9-211a60c70ff1.gif" style="width:48%; height: 50%">
-</p>
-<br/><br/>
-Laser cutters are cheap now and should be part of every makers arsenal, these examples were cut on £200 NEJE Master2s 20W, alternatively there are plenty of laser engraving/cutting companies.
-<br/><br/>
 
 ### Future updates 
 At the beginning of this article I said "LNURLPoS (currently) only uses LNURL-Pay". The next stage will be for the PoS to also create LNURL-Withdraws, which are essentially faucets. This means merchants can offer refunds, and also sell bitcoin over the counter, which creates an extremely powerful tool for local economies on-ramping and off-ramping from their local fiat currency.

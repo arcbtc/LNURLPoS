@@ -13,9 +13,15 @@
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-String server = "https://lnbits.comn";
+<<<<<<< Updated upstream
+String server = "https://lnbits.com";
 String posId = "dwKhbkWEEBgpw7Frz93y4S";
 String key = "mJwMq8rcnA9dY2fiRcTdtF";
+=======
+String server = "https://fastapi.satoshigo.app";
+String posId = "EUqh9N4oCQBzSueLvXEFpz";
+String key = "Y3z2P3tEFmyL28fcENh2p3";
+>>>>>>> Stashed changes
 String currency = "USD";
 
 ////////////////////////////////////////////////////////
@@ -74,6 +80,10 @@ char keys[rows][cols] = {
 //Big keypad setup
 //byte rowPins[rows] = {12, 13, 15, 2}; //connect to the row pinouts of the keypad
 //byte colPins[cols] = {17, 22, 21}; //connect to the column pinouts of the keypad
+
+// 4 x 4 keypad setup
+//byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
+//byte colPins[cols] = {15, 13, 12}; //connect to the column pinouts of the keypad
 
 //Small keypad setup
 byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
