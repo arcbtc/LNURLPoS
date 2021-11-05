@@ -13,16 +13,10 @@
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-<<<<<<< Updated upstream
-String server = "https://lnbits.com";
-String posId = "dwKhbkWEEBgpw7Frz93y4S";
-String key = "mJwMq8rcnA9dY2fiRcTdtF";
-=======
-String server = "https://fastapi.satoshigo.app";
-String posId = "EUqh9N4oCQBzSueLvXEFpz";
-String key = "Y3z2P3tEFmyL28fcENh2p3";
->>>>>>> Stashed changes
-String currency = "USD";
+String server = "https://legend.lnbits.com";
+String posId = "JXMhZd8iQFWV9inTsb6vKc";
+String key = "Enrt4QzajadmSu6hbwTxFz";
+String currency = "USD"; 
 
 ////////////////////////////////////////////////////////
 ////Note: See lines 75, 97, to adjust to keypad size////
