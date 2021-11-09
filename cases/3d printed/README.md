@@ -6,7 +6,7 @@ There is space inside the case for a small battery, a switch and the TTGO displa
 
 These switches will fit in the case. They should be hot glued into place until we have a better solution.
 
-https://www.amazon.co.uk/3Pin-Panel-Slide-Switch-SS12F1-G3/
+https://www.amazon.co.uk/gp/product/B00OK9FAUW/
 
 ## Printing
 
