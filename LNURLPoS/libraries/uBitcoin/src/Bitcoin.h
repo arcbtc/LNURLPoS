@@ -127,6 +127,16 @@ const char * generateMnemonic(const char * entropy_string);
 bool checkMnemonic(const char * mnemonic);
 #endif
 
+const char * mnemonicFromEntropy(const uint8_t * entropy_data, size_t dataLen);
+size_t mnemonicToEntropy(const char * mnemonic, size_t mnemonic_len, uint8_t * output, size_t outputLen);
+#if USE_ARDUINO_STRING
+size_t mnemonicToEntropy(String mnemonic, uint8_t * output, size_t outputLen);
+#elif USE_STD_STRING
+size_t mnemonicToEntropy(std::string mnemonic, uint8_t * output, size_t outputLen);
+#else
+size_t mnemonicToEntropy(char * mnemonic, uint8_t * output, size_t outputLen);
+#endif
+
 /**
  *  PublicKey class.
  *

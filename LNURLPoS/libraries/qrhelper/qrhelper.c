@@ -29,7 +29,7 @@
  *  See: https://github.com/nayuki/QR-Code-generator/tree/master/cpp
  */
 
-#include "qrcode.h"
+#include "qrhelper.h"
 
 #include <stdlib.h>
 #include <string.h>

@@ -30,8 +30,8 @@
  */
 
 
-#ifndef __QRCODE_H_
-#define __QRCODE_H_
+#ifndef __QRHELPER_H_
+#define __QRHELPER_H_
 
 #ifndef __cplusplus
 typedef unsigned char bool;
@@ -92,4 +92,4 @@ bool qrcode_getModule(QRCode *qrcode, uint8_t x, uint8_t y);
 #endif  /* __cplusplus */
 
 
-#endif  /* __QRCODE_H_ */
+#endif  /* __QRHELPER_H_ */

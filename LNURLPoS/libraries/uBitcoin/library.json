@@ -1,6 +1,6 @@
 {
   "name": "uBitcoin",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Brings Bitcoin to embedded devices. Write your own hardware wallet, vending machine or any other bitcoin-powered device. Supports public and private keys, HD wallets, transactions and scripts. Everything required to start working with Bitcoin on microcontrollers.",
   "keywords": "bitcoin, cryptography",
   "repository":
