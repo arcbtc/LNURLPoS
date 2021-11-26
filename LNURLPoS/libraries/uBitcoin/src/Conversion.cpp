@@ -121,7 +121,101 @@ size_t fromHex(const char * hex, uint8_t * array, size_t arraySize){
 }
 #endif
 
+/******************** Binary conversion *******************/
 
+size_t fromBin(const char * bin, size_t binLen, uint8_t * array, size_t arraySize){
+  // array is big enough
+  if(arraySize*8 < binLen){
+    return 0;
+  }
+  size_t len = binLen/8;
+  if(binLen % 8 != 0){
+    len += 1; // not aligned to 8 bits
+  }
+  // zero output array
+  memset(array, 0, arraySize);
+  for(size_t i = 0; i < binLen; i++){
+    // we go in reverse order (from the end of the string)
+    uint8_t exp = (i%8); // shift
+    uint8_t n = (i/8);   // current byte from the end
+    char c = bin[binLen-i-1];
+    if(c == '1'){
+      // set bit
+      array[len-n-1] |= (1<<exp);
+    }else if(c == '0'){
+      // correct char, nothing to do here
+    }else{
+      // wrong char
+      return 0;
+    }
+  }
+  return len;
+}
+
+size_t toBin(const uint8_t * array, size_t arraySize, char * output, size_t outputSize){
+  if(outputSize < arraySize*8){
+    return 0;
+  }
+  memset(output, 0, outputSize);
+  for(size_t i=0; i<arraySize; i++){
+    for(size_t j=0; j<8; j++){
+      if(((array[i] >> j) & 1) == 1){
+        output[8*i+(7-j)] = '1';
+      }else{
+        output[8*i+(7-j)] = '0';
+      }
+    }
+  }
+  return 8*arraySize;
+}
+
+#if USE_ARDUINO_STRING || USE_STD_STRING
+String toBin(const uint8_t * array, size_t arraySize){
+    char * output;
+    size_t outputSize = arraySize * 8 + 1;
+    output = (char *) malloc(outputSize);
+
+    toBin(array, arraySize, output, outputSize);
+
+    String result(output);
+
+    memset(output, 0, outputSize);
+    free(output);
+
+    return result;
+}
+#endif
+#if USE_ARDUINO_STRING
+size_t toBin(uint8_t v, Print &s){
+    for(int i=7; i>=0; i--){
+        if(((v>>i) & 1)==1){
+            s.print('1');
+        }else{
+            s.print('0');
+        }
+    }
+    return 8;
+}
+
+size_t toBin(const uint8_t * array, size_t arraySize, Print &s){
+    size_t l = 0;
+    for(int i=0; i<arraySize; i++){
+        l += toBin(array[i], s);
+    }
+    return l;
+}
+#endif
+
+#if USE_STD_STRING || USE_ARDUINO_STRING
+size_t fromBin(String encoded, uint8_t * output, size_t outputSize){
+    return fromBin(encoded.c_str(), encoded.length(), output, outputSize);
+};
+#endif
+#if !(USE_ARDUINO_STRING  || USE_STD_STRING)
+size_t fromBin(const char * hex, uint8_t * array, size_t arraySize){
+    return fromBin(hex, strlen(hex), array, arraySize);
+}
+#endif
 /******************* Base 58 conversion *******************/
 
 size_t toBase58Length(const uint8_t * array, size_t arraySize){

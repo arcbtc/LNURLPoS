@@ -106,6 +106,43 @@ const char * generateMnemonic(uint8_t numWords, const uint8_t * entropy_data, si
     size_t len = numWords*4/3;
     return mnemonic_from_data(hash, len);
 }
+
+const char * mnemonicFromEntropy(const uint8_t * entropy_data, size_t dataLen){
+    return mnemonic_from_data(entropy_data, dataLen);
+}
+size_t mnemonicToEntropy(const char * mnemonic, size_t mnemonicLen, uint8_t * output, size_t outputLen){
+    int num_words = 1;
+    for (size_t i = 0; i < strlen(mnemonic); i++){
+        if(mnemonic[i] == ' '){
+            num_words ++;
+        }
+    }
+    size_t entropy_len = (num_words*4)/3;
+    if(outputLen < entropy_len){
+        return 0;
+    }
+    uint8_t res[33] = {0};
+    int r = mnemonic_to_entropy(mnemonic, res);
+    if(r == 0){
+        return 0;
+    }
+    memcpy(output, res, entropy_len);
+    return entropy_len;
+}
+#if USE_ARDUINO_STRING
+size_t mnemonicToEntropy(String mnemonic, uint8_t * output, size_t outputLen){
+    return mnemonicToEntropy(mnemonic.c_str(), mnemonic.length(), output, outputLen);
+}
+#elif USE_STD_STRING
+size_t mnemonicToEntropy(std::string mnemonic, uint8_t * output, size_t outputLen){
+    return mnemonicToEntropy(mnemonic.c_str(), mnemonic.length(), output, outputLen);
+}
+#else
+size_t mnemonicToEntropy(char * mnemonic, uint8_t * output, size_t outputLen){
+    return mnemonicToEntropy(mnemonic, strlen(mnemonic), output, outputLen);
+}
+#endif
+
 const char * generateMnemonic(const uint8_t * entropy_data, size_t dataLen){
     return generateMnemonic(24, entropy_data, dataLen);
 }

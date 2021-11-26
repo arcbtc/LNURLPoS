@@ -63,13 +63,13 @@ void hmac_sha256_Final(HMAC_SHA256_CTX *hctx, uint8_t *hmac)
 	memzero(hctx, sizeof(HMAC_SHA256_CTX));
 }
 
-void hmac_sha256(const uint8_t *key, const uint32_t keylen, const uint8_t *msg, const uint32_t msglen, uint8_t *hmac)
-{
-	static CONFIDENTIAL HMAC_SHA256_CTX hctx;
-	hmac_sha256_Init(&hctx, key, keylen);
-	hmac_sha256_Update(&hctx, msg, msglen);
-	hmac_sha256_Final(&hctx, hmac);
-}
+// void hmac_sha256(const uint8_t *key, const uint32_t keylen, const uint8_t *msg, const uint32_t msglen, uint8_t *hmac)
+// {
+// 	static CONFIDENTIAL HMAC_SHA256_CTX hctx;
+// 	hmac_sha256_Init(&hctx, key, keylen);
+// 	hmac_sha256_Update(&hctx, msg, msglen);
+// 	hmac_sha256_Final(&hctx, hmac);
+// }
 
 void hmac_sha256_prepare(const uint8_t *key, const uint32_t keylen, uint32_t *opad_digest, uint32_t *ipad_digest)
 {

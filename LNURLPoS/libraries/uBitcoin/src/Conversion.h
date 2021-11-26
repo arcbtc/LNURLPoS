@@ -86,6 +86,26 @@ size_t fromHex(String encoded, uint8_t * output, size_t outputSize);
 size_t fromHex(std::string encoded, uint8_t * output, size_t outputSize);
 #endif
 
+size_t toBin(const uint8_t * array, size_t arraySize, char * output, size_t outputSize);
+#if USE_ARDUINO_STRING
+String toBin(const uint8_t * array, size_t arraySize);
+size_t toBin(uint8_t v, Print &s); // printing single value to Print
+size_t toBin(const uint8_t * array, size_t arraySize, Print &s);
+#endif
+#if USE_STD_STRING
+std::string toBin(const uint8_t * array, size_t arraySize);
+#endif
+size_t fromBin(const char * bin, size_t binLen, uint8_t * array, size_t arraySize);
+#if !(USE_ARDUINO_STRING  || USE_STD_STRING)
+size_t fromBin(const char * hex, uint8_t * array, size_t arraySize);
+#endif
+#if USE_ARDUINO_STRING
+size_t fromBin(String encoded, uint8_t * output, size_t outputSize);
+#endif
+#if USE_STD_STRING
+size_t fromBin(std::string encoded, uint8_t * output, size_t outputSize);
+#endif
+
 size_t toBase64Length(const uint8_t * array, size_t arraySize);
 size_t toBase64(const uint8_t * array, size_t arraySize, char * output, size_t outputSize);
 #if USE_ARDUINO_STRING

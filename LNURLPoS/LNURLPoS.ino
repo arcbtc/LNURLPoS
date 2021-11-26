@@ -3,7 +3,8 @@
 #include "TFT_eSPI.h"
 #include <Keypad.h>
 #include <string.h>
-#include "qrcode.h"
+//#include "qrcode.h"
+#include "qrhelper.h"
 #include "Bitcoin.h"
 #include <Base64.h>
 #include <Hash.h>
@@ -86,6 +87,9 @@ byte colPins[cols] = {15, 13, 12}; //connect to the column pinouts of the keypad
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, rows, cols );
 int checker = 0;
 char maxdig[20];
+
+
+
 
 
 //////////////MAIN///////////////////
