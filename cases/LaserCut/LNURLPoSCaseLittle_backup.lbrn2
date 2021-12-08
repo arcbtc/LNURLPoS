@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightBurnProject AppVersion="1.0.02" FormatVersion="1" MaterialHeight="0" MirrorX="False" MirrorY="False">
+    <VariableText>
+        <Start Value="0"/>
+        <End Value="999"/>
+        <Current Value="0"/>
+        <Increment Value="1"/>
+        <AutoAdvance Value="0"/>
+    </VariableText>
+    <UIPrefs>
+        <Optimize_ByLayer Value="0"/>
+        <Optimize_ByGroup Value="-1"/>
+        <Optimize_ByPriority Value="1"/>
+        <Optimize_WhichDirection Value="0"/>
+        <Optimize_InnerToOuter Value="1"/>
+        <Optimize_ByDirection Value="0"/>
+        <Optimize_ReduceTravel Value="1"/>
+        <Optimize_HideBacklash Value="0"/>
+        <Optimize_ReduceDirChanges Value="0"/>
+        <Optimize_ChooseCorners Value="0"/>
+        <Optimize_AllowReverse Value="1"/>
+        <Optimize_RemoveOverlaps Value="0"/>
+        <Optimize_OptimalEntryPoint Value="1"/>
+    </UIPrefs>
+    <CutSetting type="Cut">
+        <index Value="0"/>
+        <name Value="C00"/>
+        <minPower Value="97.5"/>
+        <maxPower Value="100"/>
+        <minPower2 Value="20"/>
+        <maxPower2 Value="20"/>
+        <speed Value="1.5"/>
+        <kerf Value="0"/>
+        <zOffset Value="0"/>
+        <enableLaser1 Value="1"/>
+        <enableLaser2 Value="0"/>
+        <startDelay Value="0"/>
+        <endDelay Value="0"/>
+        <throughPower Value="0"/>
+        <throughPower2 Value="0"/>
+        <enableCutThroughStart Value="0"/>
+        <enableCutThroughEnd Value="0"/>
+        <priority Value="0"/>
+        <frequency Value="20000"/>
+        <overrideFrequency Value="0"/>
+        <PPI Value="200"/>
+        <enablePPI Value="0"/>
+        <doOutput Value="1"/>
+        <hide Value="0"/>
+        <runBlower Value="1"/>
+        <autoBlower Value="0"/>
+        <blowerSpeedOverride Value="0"/>
+        <blowerSpeedPercent Value="100"/>
+        <overcut Value="0"/>
+        <rampLength Value="0"/>
+        <rampOuter Value="0"/>
+        <forceConstantPower Value="0"/>
+        <numPasses Value="2"/>
+        <zPerPass Value="0"/>
+        <perforate Value="0"/>
+        <perfLen Value="0.1"/>
+        <perfSkip Value="0.1"/>
+        <dotMode Value="0"/>
+        <dotTime Value="0"/>
+        <dotSpacing Value="0"/>
+        <tabsEnabled Value="0"/>
+        <manualTabs Value="1"/>
+        <tabSize Value="0.5"/>
+        <tabCount Value="-1"/>
+        <tabCountMax Value="-1"/>
+        <limitMaxTabs Value="0"/>
+        <tabSpacing Value="50"/>
+        <skipInnerTabs Value="0"/>
+        <tabsUseSpacing Value="1"/>
+        <tabCutPower Value="0"/>
+        <usePen Value="0"/>
+        <scanOpt Value="mergeAll"/>
+        <bidir Value="1"/>
+        <crossHatch Value="0"/>
+        <overscan Value="1"/>
+        <overscanPercent Value="2.5"/>
+        <floodFill Value="0"/>
+        <interval Value="0.1"/>
+        <angle Value="0"/>
+        <cellsPerInch Value="50"/>
+        <halftoneAngle Value="22.5"/>
+    </CutSetting>
+    <CutSetting type="Scan">
+        <index Value="1"/>
+        <name Value="C01"/>
+        <minPower Value="85"/>
+        <maxPower Value="100"/>
+        <minPower2 Value="20"/>
+        <maxPower2 Value="20"/>
+        <speed Value="6.25"/>
+        <kerf Value="0"/>
+        <zOffset Value="0"/>
+        <enableLaser1 Value="1"/>
+        <enableLaser2 Value="0"/>
+        <startDelay Value="0"/>
+        <endDelay Value="0"/>
+        <throughPower Value="0"/>
+        <throughPower2 Value="0"/>
+        <enableCutThroughStart Value="0"/>
+        <enableCutThroughEnd Value="0"/>
+        <priority Value="1"/>
+        <frequency Value="20000"/>
+        <overrideFrequency Value="0"/>
+        <PPI Value="200"/>
+        <enablePPI Value="0"/>
+        <doOutput Value="1"/>
+        <hide Value="0"/>
+        <runBlower Value="1"/>
+        <autoBlower Value="0"/>
+        <blowerSpeedOverride Value="0"/>
+        <blowerSpeedPercent Value="100"/>
+        <overcut Value="0"/>
+        <rampLength Value="0"/>
+        <rampOuter Value="0"/>
+        <forceConstantPower Value="0"/>
+        <numPasses Value="1"/>
+        <zPerPass Value="0"/>
+        <perforate Value="0"/>
+        <perfLen Value="0.1"/>
+        <perfSkip Value="0.1"/>
+        <dotMode Value="0"/>
+        <dotTime Value="0"/>
+        <dotSpacing Value="0"/>
+        <tabsEnabled Value="0"/>
+        <manualTabs Value="1"/>
+        <tabSize Value="0.5"/>
+        <tabCount Value="-1"/>
+        <tabCountMax Value="-1"/>
+        <limitMaxTabs Value="0"/>
+        <tabSpacing Value="50"/>
+        <skipInnerTabs Value="0"/>
+        <tabsUseSpacing Value="1"/>
+        <tabCutPower Value="0"/>
+        <usePen Value="0"/>
+        <scanOpt Value="mergeAll"/>
+        <bidir Value="1"/>
+        <crossHatch Value="0"/>
+        <overscan Value="1"/>
+        <overscanPercent Value="2.5"/>
+        <floodFill Value="0"/>
+        <interval Value="0.1"/>
+        <angle Value="0"/>
+        <cellsPerInch Value="50"/>
+        <halftoneAngle Value="22.5"/>
+    </CutSetting>
+    <CutSetting type="Scan">
+        <index Value="2"/>
+        <name Value="C02"/>
+        <minPower Value="67.5"/>
+        <maxPower Value="75"/>
+        <minPower2 Value="20"/>
+        <maxPower2 Value="20"/>
+        <speed Value="45"/>
+        <kerf Value="0"/>
+        <zOffset Value="0"/>
+        <enableLaser1 Value="1"/>
+        <enableLaser2 Value="0"/>
+        <startDelay Value="0"/>
+        <endDelay Value="0"/>
+        <throughPower Value="0"/>
+        <throughPower2 Value="0"/>
+        <enableCutThroughStart Value="0"/>
+        <enableCutThroughEnd Value="0"/>
+        <priority Value="2"/>
+        <frequency Value="20000"/>
+        <overrideFrequency Value="0"/>
+        <PPI Value="200"/>
+        <enablePPI Value="0"/>
+        <doOutput Value="0"/>
+        <hide Value="0"/>
+        <runBlower Value="1"/>
+        <autoBlower Value="0"/>
+        <blowerSpeedOverride Value="0"/>
+        <blowerSpeedPercent Value="100"/>
+        <overcut Value="0"/>
+        <rampLength Value="0"/>
+        <rampOuter Value="0"/>
+        <forceConstantPower Value="0"/>
+        <numPasses Value="1"/>
+        <zPerPass Value="0"/>
+        <perforate Value="0"/>
+        <perfLen Value="0.1"/>
+        <perfSkip Value="0.1"/>
+        <dotMode Value="0"/>
+        <dotTime Value="0"/>
+        <dotSpacing Value="0"/>
+        <tabsEnabled Value="0"/>
+        <manualTabs Value="1"/>
+        <tabSize Value="0.5"/>
+        <tabCount Value="-1"/>
+        <tabCountMax Value="-1"/>
+        <limitMaxTabs Value="0"/>
+        <tabSpacing Value="50"/>
+        <skipInnerTabs Value="0"/>
+        <tabsUseSpacing Value="1"/>
+        <tabCutPower Value="0"/>
+        <usePen Value="0"/>
+        <scanOpt Value="mergeAll"/>
+        <bidir Value="1"/>
+        <crossHatch Value="0"/>
+        <overscan Value="1"/>
+        <overscanPercent Value="2.5"/>
+        <floodFill Value="0"/>
+        <interval Value="0.1"/>
+        <angle Value="0"/>
+        <cellsPerInch Value="50"/>
+        <halftoneAngle Value="22.5"/>
+    </CutSetting>
+    <Shape Type="Rect" CutIndex="0" W="26.999998" H="17.000004" Cr="0">
+        <XForm>1 0 0 1 130.386 71.883</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="2.0000112" Ry="2.0000031">
+        <XForm>1 0 0 1 103.95 92.066</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="2.0000083" Ry="2">
+        <XForm>1 0 0 1 156.864 92.04</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="1.9999961" Ry="1.9999878">
+        <XForm>1 0 0 1 98.4417 55.062</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="2.0000083" Ry="2">
+        <XForm>1 0 0 1 162.355 55.064</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="2.0000007" Ry="1.9999924">
+        <XForm>1 0 0 1 21.023 22.466</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="2.0000074" Ry="1.9999992">
+        <XForm>1 0 0 1 26.5312 59.47</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="1.9999961" Ry="1.9999878">
+        <XForm>1 0 0 1 79.4454 59.444</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="1.9999961" Ry="1.9999878">
+        <XForm>1 0 0 1 84.9364 22.468</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="1.9999961" Ry="1.9999878">
+        <XForm>-1 3.25841e-7 -3.25841e-7 -1 105.929 43.934</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="1.9999961" Ry="1.9999878">
+        <XForm>-1 3.25841e-7 -3.25841e-7 -1 100.421 6.92996</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="2.0000021" Ry="1.9999939">
+        <XForm>-1 3.25841e-7 -3.25841e-7 -1 47.5069 6.95596</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="1.999999" Ry="1.9999908">
+        <XForm>-1 3.25841e-7 -3.25841e-7 -1 42.0159 43.932</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="1.2500051" Ry="1.25">
+        <XForm>-1.59999 5.21346e-7 -5.21342e-7 -1.6 99.3382 105.934</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="1.2500051" Ry="1.25">
+        <XForm>-1.59999 5.21346e-7 -5.21342e-7 -1.6 93.8301 68.93</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="1.2500051" Ry="1.25">
+        <XForm>-1.59999 5.21346e-7 -5.21343e-7 -1.6 40.9158 68.956</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="0" Rx="1.2500051" Ry="1.25">
+        <XForm>-1.59999 5.21346e-7 -5.21343e-7 -1.6 35.4248 105.932</XForm>
+    </Shape>
+    <Shape Type="Rect" CutIndex="1" W="7.0079956" H="9.1520004" Cr="0">
+        <XForm>-1 -3.25841e-7 3.25841e-7 -1 103.196 72.3891</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="1" Rx="2.5000086" Ry="2.5">
+        <XForm>-1 -3.25841e-7 3.25841e-7 -1 104.181 63.4796</XForm>
+    </Shape>
+    <Shape Type="Ellipse" CutIndex="1" Rx="2.5000086" Ry="2.5">
+        <XForm>-1 -3.25841e-7 3.25841e-7 -1 104.197 81.2994</XForm>
+    </Shape>
+    <Shape Type="Text" CutIndex="2" Font="FreeMono,-1,100,5,75,0,0,0,0,0" Str="Made using Neje Master 2s, using standard 3mm acrylic&#10;black cuts/blue etches 70% depth" H="5" LS="0" LnS="0" Ah="1" Av="1" Bold="1" Weld="1">
+        <XForm>1 0 0 1 85.2317 143.752</XForm>
+    </Shape>
+    <Shape Type="Path" CutIndex="0" VertID="3" PrimID="3">
+        <XForm>1 0 0 1 -2.82028 -17</XForm>
+        <VertList>V165.504 67.015999c0x167.03581c0y67.170555c1x1V168.2 70c0x1c1x168.2011c1y68.460403V168.2 76.367996c0x168.20474c0y77.394279c1x1V166.408 78.360001c0x1c1x167.42909c1y78.256699V166.2 78.367996c0x1c1x1V163.888 78.367996c0x1c1x1V163.888 112c0x163.88219c0y112.54974c1x1V162.888 113c0x1c1x163.43774c1y112.9939V103.512 113c0x102.96233c0y112.99394c1x1V102.512 112c0x1c1x102.51836c1y112.54967V102.512 78.367996c0x1c1x1V100.2 78.367996c0x99.095116c0y78.367966c1x1V98.199997 76.367996c0x1c1x98.199982c1y77.472885V98.199997 69.559998c0x98.197716c0y68.144783c1x1V100.76 67c0x1c1x99.344788c1y66.997742V113.28 67c0x1c1x1V113.28 28.384001c0x1c1x1V123.256 28.384001c0x1c1x1V123.256 30.351999c0x1c1x1V142.256 30.351999c0x1c1x1V142.256 28.384001c0x1c1x1V153.28 28.384001c0x1c1x1V153.28 67c0x1c1x1V165.2 67c0x1c1x1</VertList>
+        <PrimList>B0 1L1 2B2 3L3 4L4 5L5 6B6 7L7 8B8 9L9 10L10 11B11 12L12 13B13 14L14 15L15 16L16 17L17 18L18 19L19 20L20 21L21 22L22 23L23 0</PrimList>
+    </Shape>
+    <Shape Type="Path" CutIndex="0" VertID="5" PrimID="5">
+        <XForm>1 0 0 1 11.6797 0</XForm>
+        <VertList>V74.512001 17.408001c0x75.537544c0y17.508265c1x1V76.32 19.4c0x1c1x76.319305c1y18.369564V76.32 24.504c0x76.320557c0y25.52858c1x1V74.528 26.496c0x1c1x75.546928c1y26.388529V74.32 26.504c0x1c1x1V61.599998 26.504c0x1c1x1V61.599998 21.816c0x1c1x1V56.304001 21.816c0x1c1x1V56.304001 26.504c0x1c1x1V19.312 26.504c0x1c1x1V19.304001 27.4c0x1c1x1V19.304001 52c0x1c1x1V56.264 52c0x1c1x1V56.264 58.287998c0x1c1x1V61.560001 58.287998c0x1c1x1V61.560001 52c0x1c1x1V71.047997 52c0x71.537109c0y51.982708c1x1V72.040001 52.816002c0x1c1x71.962677c1y52.332733V72.047997 53c0x1c1x1V72.047997 57c0x72.045982c0y57.067245c1x1V72.024002 57.200001c0x1c1x72.037827c1y57.134159V72.024002 62.400002c0x72.017876c0y62.949692c1x1V71.024002 63.400002c0x1c1x71.573692c1y63.393867V42.048 63.400002c0x1c1x1V42.048 56.48c0x1c1x1V30.087999 56.48c0x1c1x1V30.087999 63.400002c0x1c1x1V11.592 63.400002c0x11.042291c0y63.393929c1x1V10.592 62.400002c0x1c1x10.598074c1y62.949711V10.592 54.655998c0x1c1x1V10.608 54.52c0x1c1x1V10.608 53c0x10.614005c0y52.863354c1x1V10.688 52.599998c0x1c1x10.64098c1y52.728439V10.688 28.695999c0x1c1x1V8.3520002 28.695999c0x7.2471251c0y28.695957c1x1V6.3520002 26.695999c0x1c1x6.3520432c1y27.800875V6.3520002 19.4c0x6.3520432c0y18.295124c1x1V8.3520002 17.4c0x1c1x7.2471261c1y17.400043V74.32 17.4c0x1c1x1</VertList>
+        <PrimList>B0 1L1 2B2 3L3 4L4 5L5 6L6 7L7 8L8 9L9 10L10 11L11 12L12 13L13 14L14 15L15 16B16 17L17 18L18 19B19 20L20 21B21 22L22 23L23 24L24 25L25 26L26 27B27 28L28 29L29 30L30 31B31 32L32 33L33 34B34 35L35 36B36 37L37 38L38 0</PrimList>
+    </Shape>
+    <Shape Type="Path" CutIndex="0" VertID="6" PrimID="6">
+        <XForm>1 0 0 1 0 0</XForm>
+        <VertList>V53.672001 8.0959997c0x1c1x1V53.672001 14.4c0x1c1x1V44.264 14.4c0x43.782841c0y14.422874c1x1V43.279999 13.608c0x1c1x43.3605c1y14.082928V43.264 13.4c0x1c1x1V43.264 11.88c0x1c1x1V43.248001 11.744c0x1c1x1V43.248001 4c0x43.254108c0y3.4503021c1x1V44.248001 3c0x1c1x43.698303c1y3.0061135V73.32 3c0x1c1x1V73.32 9.9280005c0x1c1x1V85.279999 9.9280005c0x1c1x1V85.279999 3c0x1c1x1V103.68 3c0x104.2309c0y3.0039551c1x1V104.68 4c0x1c1x104.67605c1y3.4490995V104.68 9.1759996c0x1c1x1V104.704 9.2880001c0x1c1x1V104.704 13.4c0x104.69805c0y13.536651c1x1V104.624 13.8c0x1c1x104.67104c1y13.671563V104.624 37.703999c0x1c1x1V106.96 37.703999c0x107.98459c0y37.7034c1x1V108.952 39.495998c0x1c1x108.84453c1y38.477066V108.96 39.703999c0x1c1x1V108.96 47c0x108.96067c0y48.024612c1x1V107.168 48.992001c0x1c1x108.18697c1y48.884655V106.96 49c0x1c1x1V46.063999 49c0x1c1x1V45.959999 49.007999c0x1c1x1V40.952 49.007999c0x39.925797c0y49.012634c1x1V38.959999 47.216c0x1c1x39.063568c1y48.236973V38.952 47.007999c0x1c1x1V38.952 41.896c0x38.9468c0y40.869511c1x1V40.743999 39.903999c0x1c1x39.722683c1y40.007057V40.952 39.896c0x1c1x1V53.672001 39.896c0x1c1x1V53.672001 44.584c0x1c1x1V58.967999 44.584c0x1c1x1V58.967999 39.896c0x1c1x1V90.087997 39.896c0x1c1x1V90.087997 33.375999c0x1c1x1V90.080002 16.112c0x1c1x1V58.967999 16.112c0x1c1x1V58.967999 8.0959997c0x1c1x1</VertList>
+        <PrimList>L0 1L1 2B2 3L3 4L4 5L5 6L6 7B7 8L8 9L9 10L10 11L11 12L12 13B13 14L14 15L15 16L16 17B17 18L18 19L19 20B20 21L21 22L22 23B23 24L24 25L25 26L26 27L27 28B28 29L29 30L30 31B31 32L32 33L33 34L34 35L35 36L36 37L37 38L38 39L39 40L40 41L41 42L42 0</PrimList>
+    </Shape>
+    <Shape Type="Path" CutIndex="0" VertID="1" PrimID="4">
+        <XForm>1 0 0 1 0 0</XForm>
+        <VertList>V52.383999 76.400002c0x1c1x1V52.383999 70.064003c0x1c1x1V47.088001 70.064003c0x1c1x1V47.088001 76.400002c0x1c1x1V45.408001 76.400002c0x1c1x1V45.408001 76.384003c0x1c1x1V43.167999 76.384003c0x1c1x1V43.167999 101.896c0x1c1x1V47 101.896c0x1c1x1V47 111c0x1c1x1V39.472 111c0x1c1x1V39.368 111.008c0x1c1x1V34.360001 111.008c0x33.333271c0y111.01367c1x1V32.368 109.216c0x1c1x32.470608c1y110.23761V32.360001 109.008c0x1c1x1V32.360001 103.896c0x32.354282c0y102.86927c1x1V34.152 101.904c0x1c1x33.13039c1y102.00661V34.360001 101.896c0x1c1x1V36.655998 101.896c0x1c1x1V36.655998 66c0x36.662151c0y65.450302c1x1V37.655998 65c0x1c1x37.106297c1y65.006042V97.087997 65c0x97.571594c0y65.002106c1x1V98.071999 65.823997c0x1c1x97.984932c1y65.348297V98.087997 66c0x1c1x1V98.087997 71.176003c0x98.121475c0y71.245712c1x1V98.112 71.400002c0x1c1x98.13015c1y71.324829V98.112 75.400002c0x98.106033c0y75.536652c1x1V98.031998 75.800003c0x1c1x98.079018c1y75.671562V98.031998 99.704002c0x1c1x1V100.368 99.704002c0x101.39421c0y99.699295c1x1V102.36 101.496c0x1c1x102.25645c1y100.47501V102.368 101.704c0x1c1x1V102.368 109c0x102.37263c0y110.02622c1x1V100.576 110.992c0x1c1x101.597c1y110.88855V100.368 111c0x1c1x1V79.552002 111c0x1c1x1V79.552002 76.400002c0x1c1x1</VertList>
+        <PrimList>L0 1L1 2L2 3L3 4L4 5L5 6L6 7L7 8L8 9L9 10L10 11L11 12B12 13L13 14L14 15B15 16L16 17L17 18L18 19B19 20L20 21B21 22L22 23L23 24B24 25L25 26B26 27L27 28L28 29B29 30L30 31L31 32B32 33L33 34L34 35L35 36L36 0</PrimList>
+    </Shape>
+    <Notes ShowOnLoad="0" Notes=""/>
+</LightBurnProject>

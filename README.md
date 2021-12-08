@@ -11,6 +11,8 @@ Lightning-network uses hot wallets and real-world payments are made from phones.
 
 > <i>For a traditional PoS experience see my <a href="https://github.com/arcbtc/LNPoS">LNPoS project</a>.</i>
 
+> <i>The manufacturer of the microcontroller used have actually released a specific kit for LNURLPoS! <a href="https://github.com/Xinyuan-LilyGO/T-Display-keyboard">LiLyGos repo</a>.</i>
+
 LNURLPoS uses the LNURL-pay protocol. LNURL-pay allows your lightning-wallet to make a secure request to a server to get a lightning-network invoice. So instead of scanning a massive ugly lightning-network invoice QR, you can scan a lovely little LNURL QR (if you <a href="https://lnurl.fiatjaf.com/codec/">decode</a> an LNURL you'll see its just a URL).  
 
 ![image](https://user-images.githubusercontent.com/33088785/134657379-bd9e18f0-0289-498b-a1fc-c084c60e64e3.png)
