@@ -134,14 +134,10 @@ void loop() {
            // Handle screen brighten on QR screen
            else if (virtkey == "1"){
             adjustQrBrightness("increase");
-            makeLNURL();
-            qrShowCode();
            }
            // Handle screen dim on QR screen
            else if (virtkey == "4"){
             adjustQrBrightness("decrease");
-            makeLNURL();
-            qrShowCode();
            }
          }
        }
@@ -175,6 +171,7 @@ void adjustQrBrightness(String direction){
     }
   }
   qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
+  qrShowCode();
 }
 
 
