@@ -61,8 +61,8 @@ TFT_eSPI tft = TFT_eSPI();
 SHA256 h;
 
 // QR screen colours
-uint16_t qrScreenBgColour = tft.color565(255, 255, 255);
-int qrScreenBrightness = 255;
+int qrScreenBrightness = 180;
+uint16_t qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
 
 //////////////KEYPAD///////////////////
 
@@ -161,20 +161,17 @@ void loop() {
   }
 }
 
-/**
- * Adjust QR code screen brightness
- */
 void adjustQrBrightness(String direction){
   if(direction == "increase" && qrScreenBrightness >= 0) {
-    qrScreenBrightness = qrScreenBrightness + 50;
+    qrScreenBrightness = qrScreenBrightness + 25;
     if(qrScreenBrightness > 255) {
       qrScreenBrightness = 255;
     }
   }
   else if(direction == "decrease" && qrScreenBrightness <= 255) {
-    qrScreenBrightness = qrScreenBrightness - 50;
+    qrScreenBrightness = qrScreenBrightness - 25;
     if(qrScreenBrightness < 0) {
-      qrScreenBrightness = 10;
+      qrScreenBrightness = 5;
     }
   }
   qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
