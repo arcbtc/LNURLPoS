@@ -13,10 +13,9 @@
 ////////////////////////////////////////////////////////
 
 String server = "https://legend.lnbits.com";
-String posId = "dwKhbkWEEBgpw7Frz93y4S";
-String key = "Enrt4QzajadmSu6hbwTxFz";
+String posId = "gjFupiv5UYw5NETnoqv3kY";
+String key = "TUBcJJuAXqiJ3PSdMeKAdV";
 String currency = "USD";
-
 
 ////////////////////////////////////////////////////////
 ////Note: See lines 75, 97, to adjust to keypad size////
@@ -324,7 +323,6 @@ void displayBatteryVoltage()
 
 void makeLNURL()
 {
-  baseURL
   randomPin = random(1000, 9999);
   byte nonce[8];
   for (int i = 0; i < 8; i++)
