@@ -60,6 +60,13 @@ String preparedURL;
 TFT_eSPI tft = TFT_eSPI();
 SHA256 h;
 
+// QR screen colours
+int qrScreenBrightness = 180;
+uint16_t qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
+
+//////////////BATTERY///////////////////
+const bool shouldDisplayBatteryLevel = true; // Display the battery level on the display?
+
 //////////////KEYPAD///////////////////
 
 const byte rows = 4; //four rows
@@ -74,6 +81,10 @@ char keys[rows][cols] = {
 //Big keypad setup
 //byte rowPins[rows] = {12, 13, 15, 2}; //connect to the row pinouts of the keypad
 //byte colPins[cols] = {17, 22, 21}; //connect to the column pinouts of the keypad
+
+//LilyGO T-Display-Keyboard
+//byte rowPins[rows] = {21, 27, 26, 22}; //connect to the row pinouts of the keypad
+//byte colPins[cols] = {33, 32, 25}; //connect to the column pinouts of the keypad
 
 // 4 x 4 keypad setup
 //byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
@@ -99,6 +110,7 @@ void setup(void) {
   
   //Set to 3 for bigger keypad
   tft.setRotation(1);
+  
   logo();
   delay(3000);
 }
@@ -126,6 +138,14 @@ void loop() {
            else if (virtkey == "#"){
             showPin();
            }
+           // Handle screen brighten on QR screen
+           else if (virtkey == "1"){
+            adjustQrBrightness("increase");
+           }
+           // Handle screen dim on QR screen
+           else if (virtkey == "4"){
+            adjustQrBrightness("decrease");
+           }
          }
        }
       
@@ -144,11 +164,28 @@ void loop() {
   }
 }
 
+void adjustQrBrightness(String direction){
+  if(direction == "increase" && qrScreenBrightness >= 0) {
+    qrScreenBrightness = qrScreenBrightness + 25;
+    if(qrScreenBrightness > 255) {
+      qrScreenBrightness = 255;
+    }
+  }
+  else if(direction == "decrease" && qrScreenBrightness <= 255) {
+    qrScreenBrightness = qrScreenBrightness - 25;
+    if(qrScreenBrightness < 0) {
+      qrScreenBrightness = 5;
+    }
+  }
+  qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
+  qrShowCode();
+}
+
 
 ///////////DISPLAY///////////////
 
 void qrShowCode(){
-  tft.fillScreen(TFT_WHITE);
+  tft.fillScreen(qrScreenBgColour);
   lnurl.toUpperCase();
   const char* lnurlChar = lnurl.c_str();
   QRCode qrcode;
@@ -162,7 +199,7 @@ void qrShowCode(){
                 tft.fillRect(60+3*x, 5+3*y, 3, 3, TFT_BLACK);
             }
             else{
-                tft.fillRect(60+3*x, 5+3*y, 3, 3, TFT_WHITE);
+                tft.fillRect(60+3*x, 5+3*y, 3, 3, qrScreenBgColour);
             }
         }
     }
@@ -199,6 +236,9 @@ void displaySats(){
   tft.setFreeFont(MIDBIGFONT);
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
   tft.println(amount);
+  
+  displayBatteryVoltage();
+        
   delay(100);
   virtkey = "";
 }
@@ -225,6 +265,31 @@ void to_upper(char * arr){
   }
 }
 
+/**
+ * Display the battery voltage
+ */
+void displayBatteryVoltage(){
+  if(shouldDisplayBatteryLevel) {
+    delay(10);
+    uint16_t v1 = analogRead(34);
+    float v1Voltage = ((float)v1 / 4095.0f) * 2.0f * 3.3f * (1100.0f / 1000.0f);
+
+    String batteryVoltage = String(v1Voltage);
+    // 80%
+    if(v1Voltage >= 4.02) {
+      tft.setTextColor(TFT_GREEN, TFT_BLACK); 
+    } 
+    // 50%
+    else if(v1Voltage >= 3.84) {
+        tft.setTextColor(TFT_YELLOW, TFT_BLACK); 
+    } else {
+       tft.setTextColor(TFT_RED, TFT_BLACK);  
+    }
+    tft.setFreeFont(SMALLFONT);
+    tft.setCursor(195, 16);
+    tft.print(batteryVoltage);
+  }
+}
 
 //////////LNURL AND CRYPTO///////////////
 ////VERY KINDLY DONATED BY SNIGIREV!/////
