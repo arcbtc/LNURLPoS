@@ -5,7 +5,6 @@
 #include <string.h>
 #include "qrcode.h"
 #include "Bitcoin.h"
-#include <Base64.h>
 #include <Hash.h>
 #include <Conversion.h>
 
