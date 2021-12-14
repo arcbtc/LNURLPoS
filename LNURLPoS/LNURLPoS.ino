@@ -156,7 +156,7 @@ void loop() {
         virtkey = "";
         cntr = "2";
       }
-      displaySats();   
+      displaySats();    
       displayBatteryVoltage();
     }
   }
@@ -265,27 +265,26 @@ void to_upper(char * arr){
  */
 void displayBatteryVoltage(){
   if(shouldDisplayBatteryLevel) {
+    delay(100);
     uint16_t v1 = analogRead(34);
-    uint16_t v2 = analogRead(14);
-    float batteryVoltage = ((float)v1 / 4095.0) * 2.0 * 3.3 * (1100 / 1000.0);
-    float otherVoltage = ((float)v2 / 4095.0) * 2.0 * 3.3 * (1100 / 1000.0);
-  
+    float v1Voltage = ((float)v1 / 4095.0f) * 2.0f * 3.3f * (1100.0f / 1000.0f);
+
+    String batteryVoltage = String(v1Voltage);
     // 80%
-    if(batteryVoltage >= 4.02) {
+    if(v1Voltage >= 4.02) {
       tft.setTextColor(TFT_GREEN, TFT_BLACK); 
     } 
     // 50%
-    else if(batteryVoltage >= 3.84) {
+    else if(v1Voltage >= 3.84) {
         tft.setTextColor(TFT_YELLOW, TFT_BLACK); 
     } else {
        tft.setTextColor(TFT_RED, TFT_BLACK);  
     }
     tft.setFreeFont(SMALLFONT);
     tft.setCursor(195, 16);
-    tft.print(String(batteryVoltage));
+    tft.print(batteryVoltage);
   }
 }
-
 
 //////////LNURL AND CRYPTO///////////////
 ////VERY KINDLY DONATED BY SNIGIREV!/////
