@@ -115,7 +115,6 @@ void loop() {
   inputs = "";
   settle = false;
   displaySats(); 
-  displayBatteryVoltage();
   bool cntr = false;
   while (cntr != true){
    char key = keypad.getKey();
@@ -157,7 +156,6 @@ void loop() {
         cntr = "2";
       }
       displaySats();    
-      displayBatteryVoltage();
     }
   }
 }
@@ -234,6 +232,9 @@ void displaySats(){
   tft.setFreeFont(MIDBIGFONT);
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
   tft.println(amount);
+  
+  displayBatteryVoltage();
+        
   delay(100);
   virtkey = "";
 }
@@ -265,7 +266,7 @@ void to_upper(char * arr){
  */
 void displayBatteryVoltage(){
   if(shouldDisplayBatteryLevel) {
-    delay(100);
+    delay(10);
     uint16_t v1 = analogRead(34);
     float v1Voltage = ((float)v1 / 4095.0f) * 2.0f * 3.3f * (1100.0f / 1000.0f);
 
