@@ -13,10 +13,9 @@
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-String server = "https://legend.lnbits.com";
-String posId = "JXMhZd8iQFWV9inTsb6vKc";
+String baseURL = "https://legend.lnbits.com/lnurlpos/api/v2/lnurl/JXMhZd8iQFWV9inTsb6vKc";
 String key = "Enrt4QzajadmSu6hbwTxFz";
-String currency = "USD"; 
+String currency = "USD";
 
 ////////////////////////////////////////////////////////
 ////Note: See lines 75, 97, to adjust to keypad size////
@@ -29,7 +28,7 @@ bool paid = false;
 bool shouldSaveConfig = false;
 bool down = false;
 const char* spiffcontent = "";
-String spiffing; 
+String spiffing;
 String lnurl;
 String choice;
 String payhash;
@@ -38,7 +37,7 @@ String cntr = "0";
 String inputs;
 int keysdec;
 int keyssdec;
-float temp;  
+float temp;
 String fiat;
 float satoshis;
 String nosats;
@@ -96,7 +95,7 @@ void setup(void) {
   digitalWrite(2, HIGH);
   h.begin();
   tft.begin();
-  
+
   //Set to 3 for bigger keypad
   tft.setRotation(1);
   logo();
@@ -106,7 +105,7 @@ void setup(void) {
 void loop() {
   inputs = "";
   settle = false;
-  displaySats(); 
+  displaySats();
   bool cntr = false;
   while (cntr != true){
    char key = keypad.getKey();
@@ -128,18 +127,18 @@ void loop() {
            }
          }
        }
-      
+
       else if (virtkey == "*"){
         tft.fillScreen(TFT_BLACK);
         tft.setCursor(0, 0);
         tft.setTextColor(TFT_WHITE);
         key_val = "";
-        inputs = "";  
+        inputs = "";
         nosats = "";
         virtkey = "";
         cntr = "2";
       }
-      displaySats();    
+      displaySats();
     }
   }
 }
@@ -158,7 +157,7 @@ void qrShowCode(){
 
         // Each horizontal module
         for (uint8_t x = 0; x < qrcode.size; x++) {
-            if(qrcode_getModule(&qrcode, x, y)){       
+            if(qrcode_getModule(&qrcode, x, y)){
                 tft.fillRect(60+3*x, 5+3*y, 3, 3, TFT_BLACK);
             }
             else{
@@ -176,7 +175,7 @@ void showPin()
   tft.setCursor(0, 20);
   tft.println("PAYMENT PROOF PIN");
   tft.setCursor(60, 80);
-  tft.setTextColor(TFT_RED, TFT_BLACK); 
+  tft.setTextColor(TFT_RED, TFT_BLACK);
   tft.setFreeFont(BIGFONT);
   tft.println(randomPin);
 }
@@ -190,7 +189,7 @@ void displaySats(){
   tft.setCursor(60, 130);
   tft.setFreeFont(SMALLFONT);
   tft.println("TO RESET PRESS *");
-  
+
   inputs += virtkey;
   float amount = float(inputs.toInt()) / 100;
   tft.setFreeFont(MIDFONT);
@@ -237,12 +236,10 @@ void makeLNURL(){
   }
   byte payload[8];
   encode_data(payload, nonce, randomPin, inputs.toInt());
-  preparedURL = server + "/lnurlpos/api/v1/lnurl/";
-  preparedURL += toHex(nonce,8);
-  preparedURL += "/";
+  preparedURL = baseURL + "?n=";
+  preparedURL += toHex(nonce, 8);
+  preparedURL += "&p=";
   preparedURL += toHex(payload, 8);
-  preparedURL += "/";
-  preparedURL += posId;
   Serial.println(preparedURL);
   char Buf[200];
   preparedURL.toCharArray(Buf, 200);
