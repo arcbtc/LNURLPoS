@@ -60,6 +60,10 @@ String preparedURL;
 TFT_eSPI tft = TFT_eSPI();
 SHA256 h;
 
+// QR screen colours
+uint16_t qrScreenBgColour = tft.color565(255, 255, 255);
+int qrScreenBrightness = 255;
+
 //////////////KEYPAD///////////////////
 
 const byte rows = 4; //four rows
@@ -99,6 +103,7 @@ void setup(void) {
   
   //Set to 3 for bigger keypad
   tft.setRotation(1);
+  
   logo();
   delay(3000);
 }
@@ -126,6 +131,18 @@ void loop() {
            else if (virtkey == "#"){
             showPin();
            }
+           // Handle screen brighten on QR screen
+           else if (virtkey == "1"){
+            adjustQrBrightness("increase");
+            makeLNURL();
+            qrShowCode();
+           }
+           // Handle screen dim on QR screen
+           else if (virtkey == "4"){
+            adjustQrBrightness("decrease");
+            makeLNURL();
+            qrShowCode();
+           }
          }
        }
       
@@ -144,11 +161,30 @@ void loop() {
   }
 }
 
+/**
+ * Adjust QR code screen brightness
+ */
+void adjustQrBrightness(String direction){
+  if(direction == "increase" && qrScreenBrightness >= 0) {
+    qrScreenBrightness = qrScreenBrightness + 50;
+    if(qrScreenBrightness > 255) {
+      qrScreenBrightness = 255;
+    }
+  }
+  else if(direction == "decrease" && qrScreenBrightness <= 255) {
+    qrScreenBrightness = qrScreenBrightness - 50;
+    if(qrScreenBrightness < 0) {
+      qrScreenBrightness = 10;
+    }
+  }
+  qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
+}
+
 
 ///////////DISPLAY///////////////
 
 void qrShowCode(){
-  tft.fillScreen(TFT_WHITE);
+  tft.fillScreen(qrScreenBgColour);
   lnurl.toUpperCase();
   const char* lnurlChar = lnurl.c_str();
   QRCode qrcode;
@@ -162,7 +198,7 @@ void qrShowCode(){
                 tft.fillRect(60+3*x, 5+3*y, 3, 3, TFT_BLACK);
             }
             else{
-                tft.fillRect(60+3*x, 5+3*y, 3, 3, TFT_WHITE);
+                tft.fillRect(60+3*x, 5+3*y, 3, 3, qrScreenBgColour);
             }
         }
     }
