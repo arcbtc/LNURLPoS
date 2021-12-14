@@ -64,6 +64,9 @@ SHA256 h;
 int qrScreenBrightness = 180;
 uint16_t qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
 
+//////////////BATTERY///////////////////
+const bool shouldDisplayBatteryLevel = true; // Display the battery level on the display?
+
 //////////////KEYPAD///////////////////
 
 const byte rows = 4; //four rows
@@ -112,6 +115,7 @@ void loop() {
   inputs = "";
   settle = false;
   displaySats(); 
+  displayBatteryVoltage();
   bool cntr = false;
   while (cntr != true){
    char key = keypad.getKey();
@@ -152,7 +156,8 @@ void loop() {
         virtkey = "";
         cntr = "2";
       }
-      displaySats();    
+      displaySats();   
+      displayBatteryVoltage();
     }
   }
 }
@@ -252,6 +257,32 @@ void to_upper(char * arr){
     if(arr[i] >= 'a' && arr[i] <= 'z'){
       arr[i] = arr[i] - 'a' + 'A';
     }
+  }
+}
+
+/**
+ * Display the battery voltage
+ */
+void displayBatteryVoltage(){
+  if(shouldDisplayBatteryLevel) {
+    uint16_t v1 = analogRead(34);
+    uint16_t v2 = analogRead(14);
+    float batteryVoltage = ((float)v1 / 4095.0) * 2.0 * 3.3 * (1100 / 1000.0);
+    float otherVoltage = ((float)v2 / 4095.0) * 2.0 * 3.3 * (1100 / 1000.0);
+  
+    // 80%
+    if(batteryVoltage >= 4.02) {
+      tft.setTextColor(TFT_GREEN, TFT_BLACK); 
+    } 
+    // 50%
+    else if(batteryVoltage >= 3.84) {
+        tft.setTextColor(TFT_YELLOW, TFT_BLACK); 
+    } else {
+       tft.setTextColor(TFT_RED, TFT_BLACK);  
+    }
+    tft.setFreeFont(SMALLFONT);
+    tft.setCursor(195, 16);
+    tft.print(String(batteryVoltage));
   }
 }
 
