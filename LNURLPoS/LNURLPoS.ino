@@ -18,8 +18,8 @@ String currency = "USD";
 
 //////////////BATTERY///////////////////
 const bool shouldDisplayBatteryLevel = true; // Display the battery level on the display?
-const float batteryMaxVoltage = 4.2; // The maximum battery voltage. Used for battery percentage calculation
-const float batteryMinVoltage = 3.73; // The minimum battery voltage that we tolerate before showing the warning
+const float batteryMaxVoltage = 4.2;         // The maximum battery voltage. Used for battery percentage calculation
+const float batteryMinVoltage = 3.73;        // The minimum battery voltage that we tolerate before showing the warning
 
 ////////////////////////////////////////////////////////
 ////Note: See lines 75, 97, to adjust to keypad size////
@@ -302,12 +302,14 @@ void displayBatteryVoltage()
 
     int batteryPercentage = (int)(batteryCurVAboveMin / batteryAllowedRange * 100);
 
-    if(batteryPercentage > 100) {
+    if (batteryPercentage > 100)
+    {
       batteryPercentage = 100;
     }
 
     int textColour = TFT_GREEN;
-    if (batteryPercentage > 70) {
+    if (batteryPercentage > 70)
+    {
       textColour = TFT_GREEN;
     }
     else if (batteryPercentage > 30)
@@ -323,31 +325,35 @@ void displayBatteryVoltage()
     tft.setFreeFont(SMALLFONT);
 
     int textXPos = 195;
-    if(batteryPercentage < 100) {
+    if (batteryPercentage < 100)
+    {
       textXPos = 200;
     }
 
-      tft.fillRect(textXPos - 2, 0, 50, 20, TFT_BLACK);
+    tft.fillRect(textXPos - 2, 0, 50, 20, TFT_BLACK);
     tft.setCursor(textXPos, 16);
 
     // Is the device charging?
-    if(batteryCurV > 4.9) {
+    if (batteryCurV > 4.9)
+    {
       tft.print("CHRG");
     }
     // Show the current voltage
-    else if(batteryPercentage > 10) {
+    else if (batteryPercentage > 10)
+    {
       tft.print(String(batteryPercentage) + "%");
     }
-    else {
+    else
+    {
       tft.print("LO!");
     }
 
-    if(showBatteryVoltage) {
+    if (showBatteryVoltage)
+    {
       tft.setFreeFont(SMALLFONT);
       tft.setCursor(155, 36);
       tft.print(String(batteryCurV) + "v");
     }
-
   }
 }
 
@@ -384,15 +390,24 @@ void makeLNURL()
 
 void encode_data(byte output[8], byte nonce[8], int pin, int amount_in_cents)
 {
+  byte hashresult[32];
   SHA256 h;
+  h.beginHMAC((uint8_t *)key.c_str(), key.length());
   h.write(nonce, 8);
-  h.write((byte *)key.c_str(), key.length());
-  h.end(output);
+  h.endHMAC(hashresult);
+  memcpy(output, hashresult, 8);
+  // first two bytes are xor of the key with PIN code
   output[0] = output[0] ^ ((byte)(pin & 0xFF));
   output[1] = output[1] ^ ((byte)(pin >> 8));
+  // next 4 bytes is amount in cents in little-endian
   for (int i = 0; i < 4; i++)
   {
     output[2 + i] = output[2 + i] ^ ((byte)(amount_in_cents & 0xFF));
     amount_in_cents = amount_in_cents >> 8;
   }
+  // last two bytes are two bytes of hmac(key, output[:6])
+  h.beginHMAC((uint8_t *)key.c_str(), key.length());
+  h.write(output, 6);
+  h.endHMAC(hashresult);
+  memcpy(output + 6, hashresult, 2);
 }
