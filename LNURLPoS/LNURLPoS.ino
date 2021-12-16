@@ -16,6 +16,11 @@ String baseURL = "https://legend.lnbits.com/lnurlpos/api/v2/lnurl/JXMhZd8iQFWV9i
 String key = "Enrt4QzajadmSu6hbwTxFz";
 String currency = "USD";
 
+//////////////BATTERY///////////////////
+const bool shouldDisplayBatteryLevel = true; // Display the battery level on the display?
+const float batteryMaxVoltage = 4.2; // The maximum battery voltage. Used for battery percentage calculation
+const float batteryMinVoltage = 3.73; // The minimum battery voltage that we tolerate before showing the warning
+
 ////////////////////////////////////////////////////////
 ////Note: See lines 75, 97, to adjust to keypad size////
 ////////////////////////////////////////////////////////
@@ -61,9 +66,6 @@ SHA256 h;
 // QR screen colours
 int qrScreenBrightness = 180;
 uint16_t qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
-
-//////////////BATTERY///////////////////
-const bool shouldDisplayBatteryLevel = true; // Display the battery level on the display?
 
 //////////////KEYPAD///////////////////
 
@@ -120,6 +122,7 @@ void loop()
   bool cntr = false;
   while (cntr != true)
   {
+    displayBatteryVoltage();
     char key = keypad.getKey();
     if (key != NO_KEY)
     {
@@ -254,8 +257,6 @@ void displaySats()
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
   tft.println(amount);
 
-  displayBatteryVoltage();
-
   delay(100);
   virtkey = "";
 }
@@ -292,28 +293,61 @@ void displayBatteryVoltage()
 {
   if (shouldDisplayBatteryLevel)
   {
-    delay(10);
+    bool showBatteryVoltage = false;
+    delay(100);
     uint16_t v1 = analogRead(34);
-    float v1Voltage = ((float)v1 / 4095.0f) * 2.0f * 3.3f * (1100.0f / 1000.0f);
+    float batteryCurV = ((float)v1 / 4095.0f) * 2.0f * 3.3f * (1100.0f / 1000.0f);
+    float batteryAllowedRange = batteryMaxVoltage - batteryMinVoltage;
+    float batteryCurVAboveMin = batteryCurV - batteryMinVoltage;
 
-    String batteryVoltage = String(v1Voltage);
-    // 80%
-    if (v1Voltage >= 4.02)
-    {
-      tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    int batteryPercentage = (int)(batteryCurVAboveMin / batteryAllowedRange * 100);
+
+    if(batteryPercentage > 100) {
+      batteryPercentage = 100;
     }
-    // 50%
-    else if (v1Voltage >= 3.84)
+
+    int textColour = TFT_GREEN;
+    if (batteryPercentage > 70) {
+      textColour = TFT_GREEN;
+    }
+    else if (batteryPercentage > 30)
     {
-      tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+      textColour = TFT_YELLOW;
     }
     else
     {
-      tft.setTextColor(TFT_RED, TFT_BLACK);
+      textColour = TFT_RED;
     }
+
+    tft.setTextColor(textColour, TFT_BLACK);
     tft.setFreeFont(SMALLFONT);
-    tft.setCursor(195, 16);
-    tft.print(batteryVoltage);
+
+    int textXPos = 195;
+    if(batteryPercentage < 100) {
+      textXPos = 200;
+    }
+
+      tft.fillRect(textXPos - 2, 0, 50, 20, TFT_BLACK);
+    tft.setCursor(textXPos, 16);
+
+    // Is the device charging?
+    if(batteryCurV > 4.9) {
+      tft.print("CHRG");
+    }
+    // Show the current voltage
+    else if(batteryPercentage > 10) {
+      tft.print(String(batteryPercentage) + "%");
+    }
+    else {
+      tft.print("LO!");
+    }
+
+    if(showBatteryVoltage) {
+      tft.setFreeFont(SMALLFONT);
+      tft.setCursor(155, 36);
+      tft.print(String(batteryCurV) + "v");
+    }
+
   }
 }
 
