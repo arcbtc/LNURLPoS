@@ -12,9 +12,8 @@
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-String server = "https://legend.lnbits.com";
-String posId = "gjFupiv5UYw5NETnoqv3kY";
-String key = "TUBcJJuAXqiJ3PSdMeKAdV";
+String baseURL = "https://legend.lnbits.com/lnurlpos/api/v2/lnurl/JXMhZd8iQFWV9inTsb6vKc";
+String key = "Enrt4QzajadmSu6hbwTxFz";
 String currency = "USD";
 
 ////////////////////////////////////////////////////////
@@ -331,7 +330,7 @@ void makeLNURL()
   }
   byte payload[8];
   encode_data(payload, nonce, randomPin, inputs.toInt());
-  preparedURL = server + "/lnurlpos/api/v2/lnurl/" + posId + "?n=";
+  preparedURL = baseURL + "?n=";
   preparedURL += toHex(nonce, 8);
   preparedURL += "&p=";
   preparedURL += toHex(payload, 8);
@@ -351,24 +350,15 @@ void makeLNURL()
 
 void encode_data(byte output[8], byte nonce[8], int pin, int amount_in_cents)
 {
-  byte hashresult[32];
   SHA256 h;
-  h.beginHMAC((uint8_t *)key.c_str(), key.length());
   h.write(nonce, 8);
-  h.endHMAC(hashresult);
-  memcpy(output, hashresult, 8);
-  // first two bytes are xor of the key with PIN code
+  h.write((byte *)key.c_str(), key.length());
+  h.end(output);
   output[0] = output[0] ^ ((byte)(pin & 0xFF));
   output[1] = output[1] ^ ((byte)(pin >> 8));
-  // next 4 bytes is amount in cents in little-endian
   for (int i = 0; i < 4; i++)
   {
     output[2 + i] = output[2 + i] ^ ((byte)(amount_in_cents & 0xFF));
     amount_in_cents = amount_in_cents >> 8;
   }
-  // last two bytes are two bytes of hmac(key, output[:6])
-  h.beginHMAC((uint8_t *)key.c_str(), key.length());
-  h.write(output, 6);
-  h.endHMAC(hashresult);
-  memcpy(output + 6, hashresult, 2);
 }
