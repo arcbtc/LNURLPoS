@@ -2,6 +2,11 @@
 #include "utility/trezor/hmac.h"
 #include "utility/trezor/ripemd160.h"
 
+#if USE_STD_STRING
+using std::string;
+#define String string
+#endif
+
 // generic funtcions for single line hash
 static size_t hashData(HashAlgorithm * algo, const uint8_t * data, size_t len, uint8_t * hash){
     algo->begin();
@@ -9,15 +14,9 @@ static size_t hashData(HashAlgorithm * algo, const uint8_t * data, size_t len, u
     return algo->end(hash);
 }
 
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 static size_t hashString(HashAlgorithm * algo, const String s, uint8_t * hash){
-    size_t len = s.length();
-    char * arr;
-    arr = (char *)malloc(len+1);
-    s.toCharArray(arr, len+1);
-    size_t r = hashData(algo, (uint8_t *)arr, len, hash);
-    free(arr);
-    return r;
+    return hashData(algo, (const uint8_t *)s.c_str(), s.length(), hash);
 }
 #endif
 
@@ -30,7 +29,7 @@ int rmd160(const uint8_t * data, size_t len, uint8_t hash[20]){
 int rmd160(const char * data, size_t len, uint8_t hash[20]){
     return rmd160((uint8_t*)data, len, hash);
 }
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 int rmd160(const String data, uint8_t hash[20]){
     RMD160 rmd;
     return hashString(&rmd, data, hash);
@@ -63,7 +62,7 @@ int sha256(const uint8_t * data, size_t len, uint8_t hash[32]){
 int sha256(const char * data, size_t len, uint8_t hash[32]){
     return sha256((uint8_t*)data, len, hash);
 }
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 int sha256(const String data, uint8_t hash[32]){
     SHA256 sha;
     return hashString(&sha, data, hash);
@@ -71,7 +70,7 @@ int sha256(const String data, uint8_t hash[32]){
 #endif
 
 int sha256Hmac(const uint8_t * key, size_t keyLen, const uint8_t * data, size_t dataLen, uint8_t hash[32]){
-    hmac_sha256(key, keyLen, data, dataLen, hash);
+    ubtc_hmac_sha256(key, keyLen, data, dataLen, hash);
     return 32;
 }
 
@@ -79,7 +78,7 @@ void SHA256::begin(){
     sha256_Init(&ctx.ctx);
 };
 void SHA256::beginHMAC(const uint8_t * key, size_t keySize){
-    hmac_sha256_Init(&ctx, key, keySize);
+    ubtc_hmac_sha256_Init(&ctx, key, keySize);
 }
 size_t SHA256::write(const uint8_t * data, size_t len){
     sha256_Update(&ctx.ctx, data, len);
@@ -95,7 +94,7 @@ size_t SHA256::end(uint8_t hash[32]){
     return 32;
 }
 size_t SHA256::endHMAC(uint8_t hmac[32]){
-    hmac_sha256_Final(&ctx, hmac);
+    ubtc_hmac_sha256_Final(&ctx, hmac);
     return 32;
 }
 
@@ -109,7 +108,7 @@ int hash160(const uint8_t * data, size_t len, uint8_t hash[20]){
 int hash160(const char * data, size_t len, uint8_t hash[20]){
     return hash160((uint8_t*)data, len, hash);
 }
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 int hash160(const String data, uint8_t hash[20]){
     Hash160 h160;
     return hashString(&h160, data, hash);
@@ -133,7 +132,7 @@ int doubleSha(const uint8_t * data, size_t len, uint8_t hash[32]){
 int doubleSha(const char * data, size_t len, uint8_t hash[32]){
     return doubleSha((uint8_t*)data, len, hash);
 }
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 int doubleSha(const String data, uint8_t hash[32]){
     DoubleSha sha;
     return hashString(&sha, data, hash);
@@ -156,7 +155,7 @@ int sha512(const uint8_t * data, size_t len, uint8_t hash[64]){
 int sha512(const char * data, size_t len, uint8_t hash[64]){
     return sha512((uint8_t*)data, len, hash);
 }
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 int sha512(const String data, uint8_t hash[64]){
     SHA512 sha;
     return hashString(&sha, data, hash);
@@ -167,7 +166,7 @@ void SHA512::begin(){
     sha512_Init(&ctx.ctx);
 };
 void SHA512::beginHMAC(const uint8_t * key, size_t keySize){
-    hmac_sha512_Init(&ctx, key, keySize);
+    ubtc_hmac_sha512_Init(&ctx, key, keySize);
 }
 size_t SHA512::write(const uint8_t * data, size_t len){
     sha512_Update(&ctx.ctx, data, len);
@@ -183,11 +182,11 @@ size_t SHA512::end(uint8_t hash[64]){
     return 64;
 }
 size_t SHA512::endHMAC(uint8_t hmac[64]){
-    hmac_sha512_Final(&ctx, hmac);
+    ubtc_hmac_sha512_Final(&ctx, hmac);
     return 64;
 }
 
 int sha512Hmac(const uint8_t * key, size_t keyLen, const uint8_t * data, size_t dataLen, uint8_t hash[64]){
-    hmac_sha512(key, keyLen, data, dataLen, hash);
+    ubtc_hmac_sha512(key, keyLen, data, dataLen, hash);
     return 64;
 }

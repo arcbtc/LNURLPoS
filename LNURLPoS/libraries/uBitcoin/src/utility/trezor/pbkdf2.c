@@ -34,7 +34,7 @@ void pbkdf2_hmac_sha256_Init(PBKDF2_HMAC_SHA256_CTX *pctx, const uint8_t *pass, 
 	REVERSE32(blocknr, blocknr);
 #endif
 
-	hmac_sha256_prepare(pass, passlen, pctx->odig, pctx->idig);
+	ubtc_hmac_sha256_prepare(pass, passlen, pctx->odig, pctx->idig);
 	memzero(pctx->g, sizeof(pctx->g));
 	pctx->g[8] = 0x80000000;
 	pctx->g[15] = (SHA256_BLOCK_LENGTH + SHA256_DIGEST_LENGTH) * 8;
@@ -108,7 +108,7 @@ void pbkdf2_hmac_sha512_Init(PBKDF2_HMAC_SHA512_CTX *pctx, const uint8_t *pass, 
 	REVERSE32(blocknr, blocknr);
 #endif
 
-	hmac_sha512_prepare(pass, passlen, pctx->odig, pctx->idig);
+	ubtc_hmac_sha512_prepare(pass, passlen, pctx->odig, pctx->idig);
 	memzero(pctx->g, sizeof(pctx->g));
 	pctx->g[8] = 0x8000000000000000;
 	pctx->g[15] = (SHA512_BLOCK_LENGTH + SHA512_DIGEST_LENGTH) * 8;

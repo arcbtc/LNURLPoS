@@ -44,6 +44,9 @@ static uint8_t hash[32];
 
 static void init_ram_seed(){
 	uint8_t * arr = (uint8_t *)malloc(1000); // just allocate some memory
+	if(arr == NULL){
+		return;
+	}
 	memcpy(arr, hash, 32); // to maintain previous entropy, kinda
 	sha256_Raw(arr, 1000, hash);
 	free(arr);

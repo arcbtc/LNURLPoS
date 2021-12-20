@@ -3,6 +3,7 @@
 
 #include "uBitcoin_conf.h"
 #include "BaseClasses.h"
+#include "utility/trezor/memzero.h"
 
 class ECPoint : public Streamable{
 protected:
@@ -16,7 +17,7 @@ public:
     virtual size_t length() const{ return 33 + 32*(1-compressed); };
     virtual size_t stringLength() const{ return 2*ECPoint::length(); };
 
-    ECPoint(){ reset(); };
+    ECPoint(){ memset(point, 0, 64); compressed = true; };
     ECPoint(const uint8_t pubkeyArr[64], bool use_compressed);
     ECPoint(const uint8_t * secArr);
     explicit ECPoint(const char * secHex);
@@ -60,8 +61,8 @@ public:
     ECPoint operator-=(const ECPoint& other){ *this = *this-other; return *this; };
 };
 
-const ECPoint InfinityPoint;
-const ECPoint GeneratorPoint("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
+extern const ECPoint InfinityPoint;
+extern const ECPoint GeneratorPoint;
 
 class ECScalar : public Streamable{
 protected:
@@ -69,14 +70,14 @@ protected:
     virtual size_t to_stream(SerializeStream *s, size_t offset = 0) const;
     uint8_t num[32];  // scalar mod secp526k1.order
 public:
-    virtual void reset(){ bytes_parsed = 0; status=PARSING_DONE; memset(num, 0, 32); };
+    virtual void reset(){ bytes_parsed = 0; status=PARSING_DONE; memzero(num, 32); };
     virtual size_t length() const{ return 32; };
 
-    ECScalar(){ reset(); };
-    ECScalar(const uint8_t * arr, size_t len){ reset(); parse(arr, len); };
-    explicit ECScalar(const char * arr){ reset(); parse(arr, strlen(arr)); };
-    ECScalar(uint32_t i){ reset(); intToBigEndian(i, num, 32); };
-    ~ECScalar(){ reset(); };
+    ECScalar(){ memzero(num, 32); };
+    ECScalar(const uint8_t * arr, size_t len):ECScalar(){ parse(arr, len); };
+    explicit ECScalar(const char * arr):ECScalar(){ parse(arr, strlen(arr)); };
+    ECScalar(uint32_t i):ECScalar(){ intToBigEndian(i, num, 32); };
+    ~ECScalar(){ memzero(num, 32); };
 
     /** \brief Populates array with the secret key */
     virtual void setSecret(const uint8_t secret_arr[32]){ memcpy(num, secret_arr, 32); };

@@ -8,8 +8,13 @@
 #include "utility/segwit_addr.h"
 
 
+#define BASE64_STANDARD  0
+#define BASE64_NOPADDING 1
+#define BASE64_URLSAFE   2
+
 // TODO: get rid of these blahLength functions, they are redundant
 //       just stop when array is full and return errorcode
+
 size_t toBase58Length(const uint8_t * array, size_t arraySize);
 size_t toBase58(const uint8_t * array, size_t arraySize, char * output, size_t outputSize);
 #if USE_ARDUINO_STRING
@@ -86,28 +91,48 @@ size_t fromHex(String encoded, uint8_t * output, size_t outputSize);
 size_t fromHex(std::string encoded, uint8_t * output, size_t outputSize);
 #endif
 
-size_t toBase64Length(const uint8_t * array, size_t arraySize);
-size_t toBase64(const uint8_t * array, size_t arraySize, char * output, size_t outputSize);
+size_t toBin(const uint8_t * array, size_t arraySize, char * output, size_t outputSize);
 #if USE_ARDUINO_STRING
-String toBase64(const uint8_t * array, size_t arraySize);
+String toBin(const uint8_t * array, size_t arraySize);
+size_t toBin(uint8_t v, Print &s); // printing single value to Print
+size_t toBin(const uint8_t * array, size_t arraySize, Print &s);
 #endif
 #if USE_STD_STRING
-std::string toBase64(const uint8_t * array, size_t arraySize);
+std::string toBin(const uint8_t * array, size_t arraySize);
 #endif
-size_t fromBase64Length(const char * array, size_t arraySize);
-size_t fromBase64(const char * encoded, size_t encodedSize, uint8_t * output, size_t outputSize);
+size_t fromBin(const char * bin, size_t binLen, uint8_t * array, size_t arraySize);
 #if !(USE_ARDUINO_STRING  || USE_STD_STRING)
-size_t fromBase64(const char * encoded, uint8_t * array, size_t arraySize);
+size_t fromBin(const char * hex, uint8_t * array, size_t arraySize);
 #endif
 #if USE_ARDUINO_STRING
-size_t fromBase64(String encoded, uint8_t * output, size_t outputSize);
-String base64ToHex(String b64);
-String hexToBase64(String hex);
+size_t fromBin(String encoded, uint8_t * output, size_t outputSize);
 #endif
 #if USE_STD_STRING
-size_t fromBase64(std::string encoded, uint8_t * output, size_t outputSize);
-std::string base64ToHex(std::string b64);
-std::string hexToBase64(std::string hex);
+size_t fromBin(std::string encoded, uint8_t * output, size_t outputSize);
+#endif
+
+size_t toBase64Length(const uint8_t * array, size_t arraySize, uint8_t flags = BASE64_STANDARD);
+size_t toBase64(const uint8_t * array, size_t arraySize, char * output, size_t outputSize, uint8_t flags = BASE64_STANDARD);
+#if USE_ARDUINO_STRING
+String toBase64(const uint8_t * array, size_t arraySize, uint8_t flags = BASE64_STANDARD);
+#endif
+#if USE_STD_STRING
+std::string toBase64(const uint8_t * array, size_t arraySize, uint8_t flags = BASE64_STANDARD);
+#endif
+size_t fromBase64Length(const char * array, size_t arraySize, uint8_t flags = BASE64_STANDARD);
+size_t fromBase64(const char * encoded, size_t encodedSize, uint8_t * output, size_t outputSize, uint8_t flags = BASE64_STANDARD);
+#if !(USE_ARDUINO_STRING  || USE_STD_STRING)
+size_t fromBase64(const char * encoded, uint8_t * array, size_t arraySize, uint8_t flags = BASE64_STANDARD);
+#endif
+#if USE_ARDUINO_STRING
+size_t fromBase64(String encoded, uint8_t * output, size_t outputSize, uint8_t flags = BASE64_STANDARD);
+String base64ToHex(String b64, uint8_t flags = BASE64_STANDARD);
+String hexToBase64(String hex, uint8_t flags = BASE64_STANDARD);
+#endif
+#if USE_STD_STRING
+size_t fromBase64(std::string encoded, uint8_t * output, size_t outputSize, uint8_t flags = BASE64_STANDARD);
+std::string base64ToHex(std::string b64, uint8_t flags = BASE64_STANDARD);
+std::string hexToBase64(std::string hex, uint8_t flags = BASE64_STANDARD);
 #endif
 
 /* int conversion */

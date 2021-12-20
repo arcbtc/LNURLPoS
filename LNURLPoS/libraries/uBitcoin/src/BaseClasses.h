@@ -125,6 +125,7 @@ protected:
     parse_status status;
     size_t bytes_parsed;
 public:
+    Streamable() { status = PARSING_DONE; bytes_parsed = 0; };
     virtual void reset(){ status = PARSING_DONE; bytes_parsed = 0; }; // used to reset parsing and mb object
     virtual size_t length() const = 0;
     virtual size_t stringLength() const{ return 2*length(); };

@@ -24,7 +24,7 @@ protected:
     virtual size_t to_stream(SerializeStream *s, size_t offset = 0) const{ return s->serialize(&tx, offset); };
     bool is_segwit;
 public:
-    ElectrumTx(){ txInsMeta = NULL; status = PARSING_DONE; };
+    ElectrumTx(){ txInsMeta = NULL; is_segwit = false; };
     ElectrumTx(ElectrumTx const &other);
     ~ElectrumTx();
     Tx tx;
