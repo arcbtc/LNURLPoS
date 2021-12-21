@@ -12,8 +12,8 @@
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-String baseURL = "https://legend.lnbits.com/lnurlpos/api/v2/lnurl/JXMhZd8iQFWV9inTsb6vKc";
-String key = "Enrt4QzajadmSu6hbwTxFz";
+String baseURL = "https://fastapi.satoshigo.app/lnurlpos/api/v1/lnurl/8vMSF3EsX8fvN9CzGtEXj6";
+String key = "BHUjF46VKrJ83xc4A7cnbQ";
 String currency = "USD";
 
 //////////////BATTERY///////////////////
@@ -368,8 +368,7 @@ void makeLNURL()
     nonce[i] = random(256);
   }
   byte payload[51]; // 51 bytes is max one can get with xor-encryption
-  // TODO: change currency_byte according to the currency defined at the top of the sketch
-  size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)key.c_str(), key.length(), nonce, sizeof(nonce), randomPin, inputs.toInt(), (byte)'$');
+  size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)key.c_str(), key.length(), nonce, sizeof(nonce), randomPin, inputs.toInt());
   preparedURL = baseURL + "?p=";
   preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
   Serial.println(preparedURL);
@@ -394,9 +393,9 @@ void makeLNURL()
  * Currency byte is '$' for USD cents, 's' for satoshi, 'E' for euro cents.
  * Returns number of bytes written to the output, 0 if error occured.
  */
-int xor_encrypt(uint8_t * output, size_t outlen, uint8_t * key, size_t keylen, uint8_t * nonce, size_t nonce_len, uint64_t pin, uint64_t amount_in_cents, uint8_t currency_byte){
+int xor_encrypt(uint8_t * output, size_t outlen, uint8_t * key, size_t keylen, uint8_t * nonce, size_t nonce_len, uint64_t pin, uint64_t amount_in_cents){
   // check we have space for all the data:
-  // <variant_byte><len|nonce><len|payload:{pin}{currency_byte}{amount}><hmac>
+  // <variant_byte><len|nonce><len|payload:{pin}{amount}><hmac>
   if(outlen < 2 + nonce_len + 1 + lenVarInt(pin) + 1 + lenVarInt(amount_in_cents) + 8){
     return 0;
   }
@@ -414,9 +413,8 @@ int xor_encrypt(uint8_t * output, size_t outlen, uint8_t * key, size_t keylen, u
   cur++;
   uint8_t * payload = output+cur; // pointer to the start of the payload
   cur += writeVarInt(pin, output+cur, outlen-cur); // pin code
-  output[cur] = currency_byte;
-  cur++;
   cur += writeVarInt(amount_in_cents, output+cur, outlen-cur); // amount
+  cur++;
   // xor it with round key
   uint8_t hmacresult[32];
   SHA256 h;
