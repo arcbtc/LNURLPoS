@@ -3,7 +3,6 @@
 #include "TFT_eSPI.h"
 #include <Keypad.h>
 #include <string.h>
-//#include "qrcode.h"
 #include "qrhelper.h"
 #include "Bitcoin.h"
 #include <Base64.h>
@@ -14,9 +13,13 @@
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-String server = "https://legend.lnbits.com";
-String posId = "JXMhZd8iQFWV9inTsb6vKc";
-String key = "Enrt4QzajadmSu6hbwTxFz";
+//{'currency': 'USD', 'id': 'G6wTqxZyNr5HktBUSxq3zq', 
+//'key': 'hdZd2A8pCuyYwiJiUaykQb', 'timestamp': 1640057015, 
+//'title': 'rapaygp POS'}
+
+String server = "https://api.rapaygo.com";
+String posId = "G6wTqxZyNr5HktBUSxq3zq";
+String key = "hdZd2A8pCuyYwiJiUaykQb";
 String currency = "USD"; 
 
 ////////////////////////////////////////////////////////
@@ -61,10 +64,11 @@ String preparedURL;
 TFT_eSPI tft = TFT_eSPI();
 SHA256 h;
 
-//////////////KEYPAD///////////////////
+
+
 
 const byte rows = 4; //four rows
-const byte cols = 3; //three columns
+const byte cols = 3; //four columns
 char keys[rows][cols] = {
   {'1','2','3'},
   {'4','5','6'},
@@ -77,8 +81,11 @@ char keys[rows][cols] = {
 //byte colPins[cols] = {17, 22, 21}; //connect to the column pinouts of the keypad
 
 // 4 x 4 keypad setup
-//byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
-//byte colPins[cols] = {15, 13, 12}; //connect to the column pinouts of the keypad
+//byte rowPins[rows] = {37, 38, 39, 32}; //connect to the row pinouts of the keypad
+//byte colPins[cols] = {33, 25, 26, 27}; //connect to the column pinouts of the keypad
+
+// byte rowPins[rows] = {37, 38, 39, 32}; //connect to the row pinouts of the keypad
+// byte colPins[cols] = {33, 25, 26}; //connect to the column pinouts of the keypad
 
 //Small keypad setup
 byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
@@ -87,9 +94,6 @@ byte colPins[cols] = {15, 13, 12}; //connect to the column pinouts of the keypad
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, rows, cols );
 int checker = 0;
 char maxdig[20];
-
-
-
 
 
 //////////////MAIN///////////////////
@@ -212,12 +216,12 @@ void logo(){
   tft.setTextColor(TFT_WHITE, TFT_BLACK);      // White characters on black background
   tft.setFreeFont(BIGFONT);
   tft.setCursor(7,70);       // To be compatible with Adafruit_GFX the cursor datum is always bottom left
-  tft.print("LNURLPoS");         // Using tft.print means text background is NEVER rendered
+  tft.print("rapaygo");         // Using tft.print means text background is NEVER rendered
 
-  tft.setTextColor(TFT_PURPLE, TFT_BLACK);      // White characters on black background
+  tft.setTextColor(TFT_GREEN, TFT_BLACK);      // White characters on black background
   tft.setFreeFont(SMALLFONT);
-  tft.setCursor(42,90);       // To be compatible with Adafruit_GFX the cursor datum is always bottom left
-  tft.print("Powered by LNbits");         // Using tft.print means text background is NEVER rendered
+  tft.setCursor(7,90);       // To be compatible with Adafruit_GFX the cursor datum is always bottom left
+  tft.print("https://rapaygo.com");         // Using tft.print means text background is NEVER rendered
 }
 
 void to_upper(char * arr){
@@ -241,7 +245,7 @@ void makeLNURL(){
   }
   byte payload[8];
   encode_data(payload, nonce, randomPin, inputs.toInt());
-  preparedURL = server + "/lnurlpos/api/v1/lnurl/";
+  preparedURL = server + "/ln/rapaygo/api/v1/lnurl/";
   preparedURL += toHex(nonce,8);
   preparedURL += "/";
   preparedURL += toHex(payload, 8);
