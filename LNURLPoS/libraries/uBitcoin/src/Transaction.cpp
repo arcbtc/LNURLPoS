@@ -5,6 +5,16 @@
 #include "Conversion.h"
 #include "utility/trezor/sha2.h"
 
+#if USE_STD_STRING
+using std::string;
+#define String string
+#endif
+
+#define UBTC_ERR_TX_GLOBAL 1
+#define UBTC_ERR_TX_INPUT  2
+#define UBTC_ERR_TX_OUTPUT 3
+#define UBTC_ERR_TX_SCRIPT 4
+
 //-------------------------------------------------------------------------------------- Transaction Input
 void TxIn::init(){
     outputIndex = 0;
@@ -88,6 +98,7 @@ size_t TxIn::from_stream(ParseStream *s){
     }
     if(scriptSig.getStatus() == PARSING_FAILED){
         status = PARSING_FAILED;
+        ubtc_errno = UBTC_ERR_TX_SCRIPT | UBTC_ERR_TX_INPUT;
         bytes_parsed+=bytes_read;
         return bytes_read;
     }
@@ -155,6 +166,7 @@ size_t TxOut::from_stream(ParseStream *s){
     }
     if(scriptPubkey.getStatus() == PARSING_FAILED){
         status = PARSING_FAILED;
+        ubtc_errno = UBTC_ERR_TX_SCRIPT | UBTC_ERR_TX_OUTPUT;
         bytes_parsed+=bytes_read;
         return bytes_read;
     }
@@ -214,7 +226,14 @@ Tx::Tx(const Tx & other){
     bytes_parsed = other.bytes_parsed;
 }
 Tx& Tx::operator=(Tx const &other){ // copy-paste =(
+    if (this == &other){ return *this; } // self-assignment
     version = other.version;
+    if(inputsNumber > 0){
+        delete [] txIns;
+    }
+    if(outputsNumber > 0){
+        delete [] txOuts;
+    }
     inputsNumber = other.inputsNumber;
     outputsNumber = other.outputsNumber;
     txIns = new TxIn[inputsNumber];
@@ -424,6 +443,7 @@ size_t Tx::from_stream(ParseStream *s){
             }
             if(txIns[i].witness.getStatus() == PARSING_FAILED){
                 status = PARSING_FAILED;
+                ubtc_errno = UBTC_ERR_TX_GLOBAL | UBTC_ERR_TX_SCRIPT;
                 bytes_parsed+=bytes_read;
                 return bytes_read;
             }
@@ -563,26 +583,13 @@ int Tx::wtxid(uint8_t * id_arr) const{
     return 32;
 }
 
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 String Tx::txid() const{
     uint8_t id[32];
     txid(id);
     return toHex(id, 32);
 }
 String Tx::wtxid() const{
-    uint8_t id[32];
-    wtxid(id);
-    return toHex(id, 32);
-}
-#endif
-
-#if USE_STD_STRING
-std::string Tx::txid() const{
-    uint8_t id[32];
-    txid(id);
-    return toHex(id, 32);
-}
-std::string Tx::wtxid() const{
     uint8_t id[32];
     wtxid(id);
     return toHex(id, 32);

@@ -76,7 +76,7 @@ protected:
     size_t last_key_pos;
 public:
     virtual size_t length() const;
-    PSBT(){ txInsMeta = NULL; txOutsMeta = NULL; status = PARSING_DONE; };
+    PSBT(){ txInsMeta = NULL; txOutsMeta = NULL; status = PARSING_DONE; current_section = 0; last_key_pos = 0; };
     PSBT(PSBT const &other);
     ~PSBT();
     Tx tx;

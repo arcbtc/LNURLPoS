@@ -10,6 +10,7 @@
 #include "utility/trezor/secp256k1.h"
 #include "utility/segwit_addr.h"
 #include "utility/trezor/bip39.h"
+#include "utility/trezor/memzero.h"
 
 #if USE_STD_STRING
 using std::string;
@@ -89,6 +90,10 @@ const Network Signet = {
 };
 
 const Network * networks[4] = { &Mainnet, &Testnet, &Regtest, &Signet };
+const uint8_t networks_len = 4;
+
+// error code when parsing fails
+int ubtc_errno = 0;
 
 const char * generateMnemonic(uint8_t numWords){
     if(numWords<12 || numWords > 24 || numWords % 3 != 0){
@@ -106,6 +111,39 @@ const char * generateMnemonic(uint8_t numWords, const uint8_t * entropy_data, si
     size_t len = numWords*4/3;
     return mnemonic_from_data(hash, len);
 }
+
+const char * mnemonicFromEntropy(const uint8_t * entropy_data, size_t dataLen){
+    return mnemonic_from_data(entropy_data, dataLen);
+}
+size_t mnemonicToEntropy(const char * mnemonic, size_t mnemonicLen, uint8_t * output, size_t outputLen){
+    int num_words = 1;
+    for (size_t i = 0; i < strlen(mnemonic); i++){
+        if(mnemonic[i] == ' '){
+            num_words ++;
+        }
+    }
+    size_t entropy_len = (num_words*4)/3;
+    if(outputLen < entropy_len){
+        return 0;
+    }
+    uint8_t res[33] = {0};
+    int r = mnemonic_to_entropy(mnemonic, res);
+    if(r == 0){
+        return 0;
+    }
+    memcpy(output, res, entropy_len);
+    return entropy_len;
+}
+#if USE_ARDUINO_STRING || USE_STD_STRING
+size_t mnemonicToEntropy(String mnemonic, uint8_t * output, size_t outputLen){
+    return mnemonicToEntropy(mnemonic.c_str(), mnemonic.length(), output, outputLen);
+}
+#else
+size_t mnemonicToEntropy(char * mnemonic, uint8_t * output, size_t outputLen){
+    return mnemonicToEntropy(mnemonic, strlen(mnemonic), output, outputLen);
+}
+#endif
+
 const char * generateMnemonic(const uint8_t * entropy_data, size_t dataLen){
     return generateMnemonic(24, entropy_data, dataLen);
 }
@@ -134,25 +172,22 @@ bool checkMnemonic(const String mnemonic){
 // ---------------------------------------------------------------- Signature class
 
 Signature::Signature(){
-    reset();
-    memset(r, 0, 32);
-    memset(s, 0, 32);
+    memzero(tot, 3);
+    index = 0;
+    memzero(r, 32);
+    memzero(s, 32);
 }
-Signature::Signature(const uint8_t r_arr[32], const uint8_t s_arr[32]){
-    reset();
+Signature::Signature(const uint8_t r_arr[32], const uint8_t s_arr[32]):Signature(){
     memcpy(r, r_arr, 32);
     memcpy(s, s_arr, 32);
 }
-Signature::Signature(const uint8_t * der){
-    reset();
+Signature::Signature(const uint8_t * der):Signature(){
     fromDer(der, der[1]+2);
 }
-Signature::Signature(const uint8_t * der, size_t derLen){
-    reset();
+Signature::Signature(const uint8_t * der, size_t derLen):Signature(){
     fromDer(der, derLen);
 }
-Signature::Signature(const char * der){
-    reset();
+Signature::Signature(const char * der):Signature(){
     ParseByteStream s(der);
     Signature::from_stream(&s);
 }
@@ -171,8 +206,9 @@ size_t Signature::from_stream(ParseStream *stream){
     }
     if(status == PARSING_DONE){
         bytes_parsed = 0;
-        memset(r, 0, 32);
-        memset(s, 0, 32);
+        memzero(tot, 3);
+        memzero(r, 32);
+        memzero(s, 32);
     }
     status = PARSING_INCOMPLETE;
     size_t bytes_read = 0;
@@ -206,33 +242,33 @@ size_t Signature::from_stream(ParseStream *stream){
         bytes_read++;
         if(c != 0){ status = PARSING_FAILED; return bytes_read; }
     }
-    while(stream->available() && bytes_parsed+bytes_read < 4+tot[1]){
+    while(stream->available() && bytes_parsed+bytes_read < (size_t)4+tot[1]){
         r[bytes_parsed+bytes_read-4+32-tot[1]] = stream->read();
         bytes_read++;
     }
     if(rlen() != tot[1]){ status = PARSING_FAILED; return bytes_read; }
     // s
-    if(stream->available() && bytes_parsed+bytes_read < 4+tot[1]+1){
+    if(stream->available() && bytes_parsed+bytes_read < (size_t)4+tot[1]+1){
         c = stream->read();
         bytes_read++;
         if(c != 0x02){ status = PARSING_FAILED; return bytes_read; }
     }
-    if(stream->available() && bytes_parsed+bytes_read < 4+tot[1]+2){
+    if(stream->available() && bytes_parsed+bytes_read < (size_t)4+tot[1]+2){
         tot[2] = stream->read();
         bytes_read++;
         if(tot[2] > 33){ status = PARSING_FAILED; return bytes_read; }
     }
-    if(stream->available() && tot[2]==33 && bytes_parsed+bytes_read < 4+tot[1]+3){
+    if(stream->available() && tot[2]==33 && bytes_parsed+bytes_read < (size_t)4+tot[1]+3){
         c = stream->read();
         bytes_read++;
         if(c != 0){ status = PARSING_FAILED; return bytes_read; }
     }
-    while(stream->available() && bytes_parsed+bytes_read < 4+tot[1]+2+tot[2]){
+    while(stream->available() && bytes_parsed+bytes_read < (size_t)4+tot[1]+2+tot[2]){
         s[bytes_parsed+bytes_read-4-tot[1]-2-tot[2]+32] = stream->read();
         bytes_read++;
     }
     if(slen() != tot[2]){ status = PARSING_FAILED; return bytes_read; }
-    if(bytes_parsed+bytes_read == 4+tot[1]+2+tot[2]){
+    if(bytes_parsed+bytes_read == (size_t)4+tot[1]+2+tot[2]){
         status = PARSING_DONE;
     }
     bytes_parsed+=bytes_read;
@@ -288,7 +324,7 @@ size_t Signature::fromDer(const uint8_t * raw, size_t rawLen){
     return Signature::from_stream(&stream);
 }
 size_t Signature::der(uint8_t * bytes, size_t len) const{
-    memset(bytes, 0, len);
+    memzero(bytes, len);
     uint8_t _rlen = rlen();
     uint8_t _slen = slen();
     bytes[0] = 0x30;
@@ -347,7 +383,7 @@ void Signature::fromBin(const uint8_t * arr, size_t len){
 // ---------------------------------------------------------------- PublicKey class
 
 int PublicKey::legacyAddress(char * address, size_t len, const Network * network) const{
-    memset(address, 0, len);
+    memzero(address, len);
 
     uint8_t buffer[20];
     uint8_t sec_arr[65] = { 0 };
@@ -360,22 +396,15 @@ int PublicKey::legacyAddress(char * address, size_t len, const Network * network
 
     return toBase58Check(addr, 21, address, len);
 }
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 String PublicKey::legacyAddress(const Network * network) const{
     char addr[40] = { 0 };
     legacyAddress(addr, sizeof(addr), network);
     return String(addr);
 }
 #endif
-#if USE_STD_STRING
-string PublicKey::legacyAddress(const Network * network) const{
-    char addr[40] = { 0 };
-    legacyAddress(addr, sizeof(addr), network);
-    return string(addr);
-}
-#endif
 int PublicKey::segwitAddress(char address[], size_t len, const Network * network) const{
-    memset(address, 0, len);
+    memzero(address, len);
     if(len < 76){ // TODO: 76 is too much for native segwit
         return 0;
     }
@@ -386,24 +415,17 @@ int PublicKey::segwitAddress(char address[], size_t len, const Network * network
     segwit_addr_encode(address, network->bech32, 0, hash, 20);
     return 76;
 }
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 String PublicKey::segwitAddress(const Network * network) const{
     char addr[76] = { 0 };
     segwitAddress(addr, sizeof(addr), network);
     return String(addr);
 }
 #endif
-#if USE_STD_STRING
-string PublicKey::segwitAddress(const Network * network) const{
-    char addr[76] = { 0 };
-    segwitAddress(addr, sizeof(addr), network);
-    return string(addr);
-}
-#endif
 int PublicKey::nestedSegwitAddress(char address[], size_t len, const Network * network) const{
-    memset(address, 0, len);
+    memzero(address, len);
     uint8_t script[22] = { 0 };
-    script[0] = 0x00;
+    // script[0] = 0x00; // no need to set - already zero
     script[1] = 0x14;
     uint8_t sec_arr[65] = { 0 };
     int l = sec(sec_arr, sizeof(sec_arr));
@@ -415,18 +437,11 @@ int PublicKey::nestedSegwitAddress(char address[], size_t len, const Network * n
 
     return toBase58Check(addr, 21, address, len);
 }
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 String PublicKey::nestedSegwitAddress(const Network * network) const{
     char addr[40] = { 0 };
     nestedSegwitAddress(addr, sizeof(addr), network);
     return String(addr);
-}
-#endif
-#if USE_STD_STRING
-string PublicKey::nestedSegwitAddress(const Network * network) const{
-    char addr[40] = { 0 };
-    nestedSegwitAddress(addr, sizeof(addr), network);
-    return string(addr);
 }
 #endif
 Script PublicKey::script(ScriptType type) const{
@@ -472,7 +487,7 @@ size_t PrivateKey::from_stream(ParseStream *s){
 }
 PrivateKey::PrivateKey(void){
     reset();
-    memset(num, 0, 32); // empty key
+    memzero(num, 32); // empty key
     network = &DEFAULT_NETWORK;
 }
 PrivateKey::PrivateKey(const uint8_t * secret_arr, bool use_compressed, const Network * net){
@@ -482,13 +497,22 @@ PrivateKey::PrivateKey(const uint8_t * secret_arr, bool use_compressed, const Ne
     pubKey = *this * GeneratorPoint;
     pubKey.compressed = use_compressed;
 }
+/*PrivateKey &PrivateKey::operator=(const PrivateKey &other){
+    if (this == &other){ return *this; } // self-assignment
+    reset();
+    other.getSecret(num);
+    network = other.network;
+    pubKey = *this * GeneratorPoint;
+    pubKey.compressed = other.pubKey.compressed;
+    return *this;
+};*/
 PrivateKey::~PrivateKey(void) {
     reset();
     // erase secret key from memory
-    memset(num, 0, 32);
+    memzero(num, 32);
 }
 int PrivateKey::wif(char * wifArr, size_t wifSize) const{
-    memset(wifArr, 0, wifSize);
+    memzero(wifArr, wifSize);
 
     uint8_t wifHex[34] = { 0 }; // prefix + 32 bytes secret (+ compressed )
     size_t len = 33;
@@ -500,28 +524,21 @@ int PrivateKey::wif(char * wifArr, size_t wifSize) const{
     }
     size_t l = toBase58Check(wifHex, len, wifArr, wifSize);
 
-    memset(wifHex, 0, sizeof(wifHex)); // secret should not stay in RAM
+    memzero(wifHex, sizeof(wifHex)); // secret should not stay in RAM
     return l;
 }
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 String PrivateKey::wif() const{
     char wifString[53] = { 0 };
     wif(wifString, sizeof(wifString));
     return String(wifString);
 }
 #endif
-#if USE_STD_STRING
-std::string PrivateKey::wif() const{
-    char wifString[53] = { 0 };
-    wif(wifString, sizeof(wifString));
-    return std::string(wifString);
-}
-#endif
 int PrivateKey::fromWIF(const char * wifArr, size_t wifSize){
     uint8_t arr[40] = { 0 };
     size_t l = fromBase58Check(wifArr, wifSize, arr, sizeof(arr));
     if( (l < 33) || (l > 34) ){
-        memset(num, 0, 32);
+        memzero(num, 32);
         return 0;
     }
     bool compressed;
@@ -545,7 +562,7 @@ int PrivateKey::fromWIF(const char * wifArr, size_t wifSize){
         compressed = false;
     }
     memcpy(num, arr+1, 32);
-    memset(arr, 0, 40); // clear memory
+    memzero(arr, 40); // clear memory
 
     pubKey = *this * GeneratorPoint;
     pubKey.compressed = compressed;
@@ -571,7 +588,7 @@ int PrivateKey::segwitAddress(char * address, size_t len) const{
 int PrivateKey::nestedSegwitAddress(char * address, size_t len) const{
     return pubKey.nestedSegwitAddress(address, len, network);
 }
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 String PrivateKey::address() const{
     return pubKey.address(network);
 }
@@ -582,20 +599,6 @@ String PrivateKey::segwitAddress() const{
     return pubKey.segwitAddress(network);
 }
 String PrivateKey::nestedSegwitAddress() const{
-    return pubKey.nestedSegwitAddress(network);
-}
-#endif
-#if USE_STD_STRING
-string PrivateKey::address() const{
-    return pubKey.address(network);
-}
-string PrivateKey::legacyAddress() const{
-    return pubKey.legacyAddress(network);
-}
-string PrivateKey::segwitAddress() const{
-    return pubKey.segwitAddress(network);
-}
-string PrivateKey::nestedSegwitAddress() const{
     return pubKey.nestedSegwitAddress(network);
 }
 #endif
@@ -612,11 +615,12 @@ Signature PrivateKey::sign(const uint8_t hash[32]) const{
     sig.index = i;
     return sig;
 }
-PrivateKey::PrivateKey(const char * wifArr){
-    fromWIF(wifArr);
-}
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 PrivateKey::PrivateKey(const String wifString){
     fromWIF(wifString.c_str());
+}
+#else
+PrivateKey::PrivateKey(const char * wifArr){
+    fromWIF(wifArr);
 }
 #endif

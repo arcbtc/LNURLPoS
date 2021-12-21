@@ -37,6 +37,15 @@ void printHD(String mnemonic, String password = ""){
 void setup() {
   Serial.begin(115200);
   printHD("arch volcano urge cradle turn labor skin secret squeeze denial jacket vintage fix glad lemon", "my secret password");
+
+  // entropy bytes to mnemonic
+  uint8_t arr[] = {'1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'};
+  String mn = mnemonicFromEntropy(arr, sizeof(arr));
+  Serial.println(mn);
+  uint8_t out[16];
+  size_t len = mnemonicToEntropy(mn, out, sizeof(out));
+  Serial.println(toHex(out, len));
+
 }
 
 void loop() {

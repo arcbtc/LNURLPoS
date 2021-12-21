@@ -4,25 +4,30 @@
 #include "OpCodes.h"
 #include "utility/segwit_addr.h"
 
+#if USE_STD_STRING
+using std::string;
+#define String string
+#endif
+
 #define MAX_SCRIPT_SIZE 10000
 
 //------------------------------------------------------------ Script
 void Script::init(){
     reset();
     scriptLen = 0;
-    scriptArray = NULL;    
+    scriptArray = NULL;
+    lenLen = 0;
 }
 Script::Script(void){
-    init();
+    scriptLen = 0;
+    scriptArray = NULL;
+    lenLen = 0;
 }
-Script::Script(const uint8_t * buffer, size_t len){
-    reset();
+Script::Script(const uint8_t * buffer, size_t len):Script(){
     push(buffer, len);
 }
 void Script::fromAddress(const char * address){
-    reset();
-    scriptLen = 0;
-    scriptArray = NULL;
+    clear();
     uint8_t addr[21];
     size_t len = strlen(address);
     if(len > 100){ // very wrong address
@@ -48,6 +53,7 @@ void Script::fromAddress(const char * address){
         }
         scriptLen = prog_len + 2;
         scriptArray = (uint8_t *) calloc( scriptLen, sizeof(uint8_t));
+        if(scriptArray == NULL){ scriptLen = 0; return; }
         scriptArray[0] = ver;
         scriptArray[1] = prog_len; // varint?
         memcpy(scriptArray+2, prog, prog_len);
@@ -71,6 +77,7 @@ void Script::fromAddress(const char * address){
         if(type == P2PKH){
             scriptLen = 25;
             scriptArray = (uint8_t *) calloc( scriptLen, sizeof(uint8_t));
+            if(scriptArray == NULL){ scriptLen = 0; return; }
             scriptArray[0] = OP_DUP;
             scriptArray[1] = OP_HASH160;
             scriptArray[2] = 20;
@@ -81,6 +88,7 @@ void Script::fromAddress(const char * address){
         if(type == P2SH){
             scriptLen = 23;
             scriptArray = (uint8_t *) calloc( scriptLen, sizeof(uint8_t));
+            if(scriptArray == NULL){ scriptLen = 0; return; }
             scriptArray[0] = OP_HASH160;
             scriptArray[1] = 20;
             memcpy(scriptArray+2, addr+1, 20);
@@ -88,11 +96,11 @@ void Script::fromAddress(const char * address){
         }
     }
 }
-Script::Script(const PublicKey pubkey, ScriptType type){
-    reset();
+Script::Script(const PublicKey pubkey, ScriptType type):Script(){
     if(type == P2PKH){
         scriptLen = 25;
         scriptArray = (uint8_t *) calloc( scriptLen, sizeof(uint8_t));
+        if(scriptArray == NULL){ scriptLen = 0; return; }
         scriptArray[0] = OP_DUP;
         scriptArray[1] = OP_HASH160;
         scriptArray[2] = 20;
@@ -105,6 +113,7 @@ Script::Script(const PublicKey pubkey, ScriptType type){
     if(type == P2WPKH){
         scriptLen = 22;
         scriptArray = (uint8_t *) calloc( scriptLen, sizeof(uint8_t));
+        if(scriptArray == NULL){ scriptLen = 0; return; }
         scriptArray[0] = 0x00;
         scriptArray[1] = 20;
         uint8_t sec_arr[65] = { 0 };
@@ -112,11 +121,11 @@ Script::Script(const PublicKey pubkey, ScriptType type){
         hash160(sec_arr, l, scriptArray+2);
     }
 }
-Script::Script(const Script &other, ScriptType type){
-    reset();
+Script::Script(const Script &other, ScriptType type):Script(){
     if(type == P2SH){
         scriptLen = 23;
         scriptArray = (uint8_t *) calloc(scriptLen, sizeof(uint8_t));
+        if(scriptArray == NULL){ scriptLen = 0; return; }
         hash160(other.scriptArray, other.scriptLen, scriptArray+2);
         scriptArray[0] = OP_HASH160;
         scriptArray[1] = 20;
@@ -125,15 +134,18 @@ Script::Script(const Script &other, ScriptType type){
     if(type == P2WSH){
         scriptLen = 34;
         scriptArray = (uint8_t *) calloc(scriptLen, sizeof(uint8_t));
+        if(scriptArray == NULL){ scriptLen = 0; return; }
         sha256(other.scriptArray, other.scriptLen, scriptArray+2);
         scriptArray[0] = 0x00;
         scriptArray[1] = 32;
     }
 }
 void Script::clear(){
-    if(scriptLen > 0){
+    if(scriptLen > 0 && scriptArray != NULL){
         free(scriptArray);
+        scriptArray = NULL;
         scriptLen = 0;
+        lenLen = 0;
     }
 }
 size_t Script::from_stream(ParseStream *s){
@@ -161,6 +173,7 @@ size_t Script::from_stream(ParseStream *s){
             lenLen = 1+(1 << (lenLen - 0xfc));
             scriptArray = (uint8_t *) calloc( 255, sizeof(uint8_t));
         }
+        if(scriptArray == NULL && scriptLen > 0){ status = PARSING_FAILED; scriptLen = 0; return 0; }
     }
     while(s->available() > 0 && bytes_parsed+bytes_read < lenLen){
         scriptLen += (s->read() << (8*(bytes_parsed+bytes_read-1)));
@@ -169,6 +182,7 @@ size_t Script::from_stream(ParseStream *s){
     if(bytes_parsed+bytes_read == lenLen && scriptLen > 0){
         free(scriptArray);
         scriptArray = (uint8_t *) calloc( scriptLen, sizeof(uint8_t));
+        if(scriptArray == NULL){ status = PARSING_FAILED; scriptLen = 0; return 0; }
     }
     if(bytes_parsed+bytes_read == lenLen && lenVarInt(scriptLen) != lenLen){
         status = PARSING_FAILED;
@@ -277,7 +291,7 @@ size_t Script::address(char * buffer, size_t len, const Network * network) const
     }
     return 0;
 }
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 String Script::address(const Network * network) const{
     char buffer[100] = { 0 };
     size_t l = address(buffer, sizeof(buffer), network);
@@ -285,16 +299,6 @@ String Script::address(const Network * network) const{
         return String("");
     }
     return String(buffer);
-}
-#endif
-#if USE_STD_STRING
-std::string Script::address(const Network * network) const{
-    char buffer[100] = { 0 };
-    size_t l = address(buffer, sizeof(buffer), network);
-    if(l == 0){
-        return string("");
-    }
-    return string(buffer);
 }
 #endif
 size_t Script::length() const{
@@ -308,9 +312,12 @@ size_t Script::push(uint8_t code){
     if(scriptLen == 0){
         scriptLen = 1;
         scriptArray = (uint8_t *) calloc( scriptLen, sizeof(uint8_t));
+        if(scriptArray == NULL){ scriptLen = 0; return 0; } // check if allocation failed
     }else{
         scriptLen ++;
-        scriptArray = (uint8_t *) realloc( scriptArray, scriptLen * sizeof(uint8_t));
+        uint8_t * ptr = (uint8_t *) realloc( scriptArray, scriptLen * sizeof(uint8_t));
+        if(ptr == NULL){ free(scriptArray); scriptArray = NULL; scriptLen = 0; return 0; } // check if realloc failed
+        scriptArray = ptr;
     }
     scriptArray[scriptLen-1] = code;
     return scriptLen;
@@ -323,8 +330,11 @@ size_t Script::push(const uint8_t * data, size_t len){
     if(scriptLen == 0){
         scriptArray = (uint8_t *) calloc( len, sizeof(uint8_t));
     }else{
-        scriptArray = (uint8_t *) realloc( scriptArray, (scriptLen + len) * sizeof(uint8_t));
+        uint8_t * ptr = (uint8_t *) realloc( scriptArray, (scriptLen + len) * sizeof(uint8_t));
+        if(ptr == NULL){ free(scriptArray); scriptArray = NULL; scriptLen = 0; return 0; }
+        scriptArray = ptr;
     }
+    if(scriptArray == NULL){ scriptLen = 0; return 0; }
     memcpy(scriptArray + scriptLen, data, len);
     scriptLen += len;
     return scriptLen;
@@ -345,9 +355,10 @@ size_t Script::push(const Signature sig, SigHashType sigType){
     return scriptLen;
 }
 size_t Script::push(const Script sc){
-    uint8_t len = sc.length();
+    size_t len = sc.length();
     uint8_t * tmp;
     tmp = (uint8_t *)calloc(len, sizeof(uint8_t));
+    if(tmp == NULL){ return 0; }
     sc.serialize(tmp, len);
     push(tmp, len);
     return scriptLen;
@@ -357,11 +368,13 @@ Script Script::scriptPubkey(ScriptType type) const{
     return sc;
 }
 Script &Script::operator=(const Script &other){
+    if (this == &other){ return *this; } // self-assignment
     reset();
     clear();
     if(other.scriptLen > 0){
         scriptLen = other.scriptLen;
         scriptArray = (uint8_t *) calloc( scriptLen, sizeof(uint8_t));
+        if(scriptArray == NULL){ scriptLen = 0; return *this; }
         memcpy(scriptArray, other.scriptArray, scriptLen);
     }
     return *this;
@@ -371,6 +384,7 @@ Script::Script(const Script &other){
     if(other.scriptLen > 0){
         scriptLen = other.scriptLen;
         scriptArray = (uint8_t *) calloc( scriptLen, sizeof(uint8_t));
+        if(scriptArray == NULL){ scriptLen = 0; return; }
         memcpy(scriptArray, other.scriptArray, scriptLen);
     }
 };
@@ -387,6 +401,8 @@ void Witness::clear(){
 void Witness::init(){
     numElements = 0;
     witnessLen = 0;
+    witnessArray = NULL;
+    curLen = 0;
     reset();
     clear();
 }
@@ -394,18 +410,12 @@ Witness::Witness(void){
     init();
 }
 Witness::Witness(const uint8_t * buffer, size_t len){
-    numElements = 0;
-    witnessLen = 0;
-    reset();
-    clear();
+    init();
     ParseByteStream s(buffer, len);
     Witness::from_stream(&s);
 }
 Witness::Witness(const Signature sig, const PublicKey pubkey){
-    numElements = 0;
-    witnessLen = 0;
-    reset();
-    clear();
+    init();
     push(sig);
     push(pubkey);
 }
@@ -475,9 +485,12 @@ size_t Witness::from_stream(ParseStream *s){
             if(witnessLen==0){
                 witnessLen = cur_element_len+lenVarInt(cur_element_len);
                 witnessArray = (uint8_t *)calloc(witnessLen, sizeof(uint8_t));
+                if(witnessArray == NULL){ witnessLen = 0; status=PARSING_FAILED; return 0;}
                 writeVarInt(cur_element_len, witnessArray, lenVarInt(cur_element_len));
             }else{
-                witnessArray = (uint8_t *)realloc( witnessArray, (witnessLen + cur_element_len + lenVarInt(cur_element_len)) * sizeof(uint8_t));
+                uint8_t * ptr = (uint8_t *)realloc( witnessArray, (witnessLen + cur_element_len + lenVarInt(cur_element_len)) * sizeof(uint8_t));
+                if(ptr == NULL){ free(witnessArray); witnessLen = 0; status=PARSING_FAILED; return 0;}
+                witnessArray = ptr;
                 witnessLen += cur_element_len+lenVarInt(cur_element_len);
                 writeVarInt(cur_element_len, witnessArray+offset, lenVarInt(cur_element_len));
             }
@@ -529,8 +542,11 @@ size_t Witness::push(const uint8_t * data, size_t len){
     }
     if(witnessLen == 0){
         witnessArray = (uint8_t *) calloc( len + lenVarInt(len), sizeof(uint8_t));
+        if(witnessArray == NULL){ witnessLen = 0; return 0; }
     }else{
-        witnessArray = (uint8_t *) realloc( witnessArray, (witnessLen + len + lenVarInt(len)) * sizeof(uint8_t));
+        uint8_t * ptr = (uint8_t *) realloc( witnessArray, (witnessLen + len + lenVarInt(len)) * sizeof(uint8_t));
+        if(ptr == NULL){ free(witnessArray); witnessLen = 0; return 0; }
+        witnessArray = ptr;
     }
     writeVarInt(len, witnessArray+witnessLen, lenVarInt(len));
     memcpy(witnessArray + witnessLen + lenVarInt(len), data, len);
@@ -552,9 +568,10 @@ size_t Witness::push(const Signature sig, SigHashType sigType){
     return witnessLen;
 }
 size_t Witness::push(const Script sc){
-    uint8_t len = sc.length();
+    size_t len = sc.length();
     uint8_t * tmp;
     tmp = (uint8_t *)calloc(len, sizeof(uint8_t));
+    if(tmp == NULL){ return 0; }
     size_t l = sc.serialize(tmp, len);
     size_t dl = readVarInt(tmp, len);
     push(tmp+l-dl, dl);
@@ -567,15 +584,18 @@ Witness::Witness(const Witness &other){
     if(other.witnessLen > 0){
         witnessLen = other.witnessLen;
         witnessArray = (uint8_t *) calloc( witnessLen, sizeof(uint8_t));
+        if(witnessArray == NULL){ witnessLen = 0; return;}
         memcpy(witnessArray, other.witnessArray, witnessLen);
     }
 };
 Witness &Witness::operator=(Witness const &other){
+    if (this == &other){ return *this; } // self-assignment
     clear();
     numElements = other.numElements;
     if(other.witnessLen > 0){
         witnessLen = other.witnessLen;
         witnessArray = (uint8_t *) calloc( witnessLen, sizeof(uint8_t));
+        if(witnessArray == NULL){ witnessLen = 0; return *this;}
         memcpy(witnessArray, other.witnessArray, witnessLen);
     }
     return *this;

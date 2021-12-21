@@ -30,6 +30,9 @@ int rmd160(const char * data, size_t len, uint8_t hash[20]);
 #if USE_ARDUINO_STRING
 int rmd160(const String data, uint8_t hash[20]);
 #endif
+#if USE_STD_STRING
+int rmd160(const std::string data, uint8_t hash[20]);
+#endif
 
 class RMD160 : public HashAlgorithm{
 public:
@@ -49,6 +52,9 @@ int sha256(const uint8_t * data, size_t len, uint8_t hash[32]);
 int sha256(const char * data, size_t len, uint8_t hash[32]);
 #if USE_ARDUINO_STRING
 int sha256(const String data, uint8_t hash[32]);
+#endif
+#if USE_STD_STRING
+int sha256(const std::string data, uint8_t hash[32]);
 #endif
 
 int sha256Hmac(const uint8_t * key, size_t keyLen, const uint8_t * data, size_t dataLen, uint8_t hash[32]);
@@ -76,6 +82,9 @@ int hash160(const char * data, size_t len, uint8_t hash[20]);
 #if USE_ARDUINO_STRING
 int hash160(const String data, uint8_t hash[20]);
 #endif
+#if USE_STD_STRING
+int hash160(const std::string data, uint8_t hash[20]);
+#endif
 
 class Hash160 : public SHA256{
 public:
@@ -91,6 +100,9 @@ int doubleSha(const char * data, size_t len, uint8_t hash[32]);
 #if USE_ARDUINO_STRING
 int doubleSha(const String data, uint8_t hash[32]);
 #endif
+#if USE_STD_STRING
+int doubleSha(const std::string data, uint8_t hash[32]);
+#endif
 
 class DoubleSha : public SHA256{
 public:
@@ -105,6 +117,9 @@ int sha512(const uint8_t * data, size_t len, uint8_t hash[64]);
 int sha512(const char * data, size_t len, uint8_t hash[64]);
 #if USE_ARDUINO_STRING
 int sha512(const String data, uint8_t hash[64]);
+#endif
+#if USE_STD_STRING
+int sha512(const std::string data, uint8_t hash[64]);
 #endif
 
 class SHA512 : public HashAlgorithm{

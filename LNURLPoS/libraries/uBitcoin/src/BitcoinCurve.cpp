@@ -4,6 +4,9 @@
 #include "utility/trezor/ecdsa.h"
 #include "utility/trezor/secp256k1.h"
 
+const ECPoint InfinityPoint;
+const ECPoint GeneratorPoint("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
+
 size_t ECPoint::from_stream(ParseStream *s){
 	static uint8_t first_byte;
 	if(status == PARSING_FAILED){
@@ -49,9 +52,7 @@ size_t ECPoint::from_stream(ParseStream *s){
             memcpy(point, arr+1, 64);
 		}
 		status = PARSING_DONE;
-		if(ECPoint::isValid()){
-    		status = PARSING_DONE;
-		}else{
+		if(!ECPoint::isValid()){
 			status = PARSING_FAILED;
 		}
 	}
@@ -90,18 +91,15 @@ size_t ECPoint::fromSec(const uint8_t * arr, size_t len){
 ECPoint::ECPoint(const uint8_t pubkeyArr[64], bool use_compressed){ 
 	memcpy(point, pubkeyArr, 64);
 	compressed = use_compressed;
-	reset(); 
 };
 ECPoint::ECPoint(const uint8_t * secArr){ 
-	reset();
 	if(secArr[0] == 0x04){
 		ECPoint::fromSec(secArr, 65);
 	}else{
 		ECPoint::fromSec(secArr, 33);
 	}
 };
-ECPoint::ECPoint(const char * arr){ 
-	reset();
+ECPoint::ECPoint(const char * arr):ECPoint(){
 	ECPoint::parse(arr, strlen(arr));
 };
 
@@ -216,7 +214,7 @@ ECScalar ECScalar::operator-() const{
 	return neg;
 }
 ECScalar ECScalar::operator-(const uint32_t& i) const{
-    bignum256 a, b;
+    bignum256 a;
 	bn_read_be(this->num, &a);
 	bn_subi(&a, i, &secp256k1.order);
     bn_mod(&a, &secp256k1.order);

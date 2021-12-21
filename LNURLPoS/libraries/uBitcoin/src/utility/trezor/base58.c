@@ -53,7 +53,7 @@ bool b58tobin(void *bin, size_t *binszp, const char *b58)
 	}
 
 	const unsigned char *b58u = (const unsigned char*)b58;
-	unsigned char *binu = bin;
+	unsigned char *binu = (unsigned char *)bin;
 	size_t outisz = (binsz + 3) / 4;
 	uint32_t outi[outisz];
 	uint64_t t;
@@ -120,7 +120,7 @@ bool b58tobin(void *bin, size_t *binszp, const char *b58)
 	}
 
 	// Count canonical base58 byte count
-	binu = bin;
+	binu = (unsigned char *)bin;
 	for (i = 0; i < binsz; ++i)
 	{
 		if (binu[i]) {
@@ -140,11 +140,11 @@ bool b58tobin(void *bin, size_t *binszp, const char *b58)
 int b58check(const void *bin, size_t binsz, HasherType hasher_type, const char *base58str)
 {
 	unsigned char buf[32];
-	const uint8_t *binc = bin;
+	const uint8_t *binc = (const uint8_t *)bin;
 	unsigned i;
 	if (binsz < 4)
 		return -4;
-	hasher_Raw(hasher_type, bin, binsz - 4, buf);
+	hasher_Raw(hasher_type, (const uint8_t *)bin, binsz - 4, buf);
 	if (memcmp(&binc[binsz - 4], buf, 4))
 		return -1;
 
@@ -159,7 +159,7 @@ int b58check(const void *bin, size_t binsz, HasherType hasher_type, const char *
 
 bool b58enc(char *b58, size_t *b58sz, const void *data, size_t binsz)
 {
-	const uint8_t *bin = data;
+	const uint8_t *bin = (const uint8_t *)data;
 	int carry;
 	ssize_t i, j, high, zcount = 0;
 	size_t size;

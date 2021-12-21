@@ -1,4 +1,10 @@
+#include "uBitcoin_conf.h"
 #include "BaseClasses.h"
+
+#if USE_STD_STRING
+using std::string;
+#define String string
+#endif
 
 size_t SerializeStream::serialize(const Streamable * s, size_t offset){
     return s->to_stream(this, offset);
@@ -13,19 +19,15 @@ ParseByteStream::ParseByteStream(const uint8_t * arr, size_t length, encoding_fo
     last = -1;
     format = f;
     cursor = 0;
-    len = length;
-    if(arr == NULL){
-        len = 0;
-    }
+    len = (arr == NULL) ? 0 : length;
     buf = arr;
 }
+// TODO: call prev constructor
 ParseByteStream::ParseByteStream(const char * arr, encoding_format f){
     last = -1;
+    format = f;
     cursor = 0;
-    len = strlen(arr);
-    if(arr == NULL){
-        len = 0;
-    }
+    len = (arr == NULL) ? 0 : strlen(arr);
     buf = (const uint8_t *) arr;
 }
 ParseByteStream::~ParseByteStream(){
@@ -81,6 +83,7 @@ SerializeByteStream::SerializeByteStream(uint8_t * arr, size_t length, encoding_
     format = f; cursor = 0; buf = arr; len = length;
     memset(arr, 0, length);
 }
+// TODO: should length be here? See above - we used strlen
 SerializeByteStream::SerializeByteStream(char * arr, size_t length, encoding_format f){
     format = f; cursor = 0; buf = (uint8_t *)arr; len = length;
     memset(arr, 0, length);
@@ -134,7 +137,7 @@ size_t Readable::printTo(Print& p) const{
     return len-1;
 }
 #endif
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 String Readable::toString() const{
     size_t len = this->stringLength()+1;
     char * arr = (char *)calloc(len, sizeof(char));
@@ -144,20 +147,10 @@ String Readable::toString() const{
     return s;
 };
 #endif
-#if USE_STD_STRING
-std::string Readable::toString() const{
-    size_t len = this->stringLength()+1;
-    char * arr = (char *)calloc(len, sizeof(char));
-    toString(arr, len);
-    std::string s = arr;
-    free(arr);
-    return s;
-};
-#endif
 
 /************ Streamable Class ************/
 
-#if USE_ARDUINO_STRING
+#if USE_ARDUINO_STRING || USE_STD_STRING
 String Streamable::serialize(size_t offset, size_t len) const{
     if(len == 0){
         len = (length()-offset);
@@ -165,18 +158,6 @@ String Streamable::serialize(size_t offset, size_t len) const{
     char * arr = (char *)calloc(2*len+1, sizeof(char));
     serialize(arr, 2*len, offset, HEX_ENCODING);
     String s = arr;
-    free(arr);
-    return s;
-};
-#endif
-#if USE_STD_STRING
-std::string Streamable::serialize(size_t offset, size_t len) const{
-    if(len == 0){
-        len = (length()-offset);
-    }
-    char * arr = (char *)calloc(2*len+1, sizeof(char));
-    serialize(arr, 2*len, offset, HEX_ENCODING);
-    std::string s = arr;
     free(arr);
     return s;
 };

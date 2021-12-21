@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include "utility/trezor/memzero.h"
 
 #if USE_STD_STRING
 using std::string;
@@ -14,11 +15,12 @@ static const char BASE43_CHARS[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*+-./:"
 static const char BASE64_CHARS[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 size_t toHex(const uint8_t * array, size_t arraySize, char * output, size_t outputSize){
+    if(array == NULL || output == NULL){ return 0; }
     // uint8_t * array = (uint8_t *) arr;
     if(outputSize < 2*arraySize){
         return 0;
     }
-    memset(output, 0, outputSize);
+    memzero(output, outputSize);
 
     for(size_t i=0; i < arraySize; i++){
         output[2*i] = (array[i] >> 4) + '0';
@@ -35,15 +37,16 @@ size_t toHex(const uint8_t * array, size_t arraySize, char * output, size_t outp
 }
 #if USE_ARDUINO_STRING || USE_STD_STRING
 String toHex(const uint8_t * array, size_t arraySize){
-    char * output;
+    if(array == NULL){ return String(); }
     size_t outputSize = arraySize * 2 + 1;
-    output = (char *) malloc(outputSize);
+    char * output = (char *) malloc(outputSize);
+    if(output == NULL){ return String(); }
 
     toHex(array, arraySize, output, outputSize);
 
     String result(output);
 
-    memset(output, 0, outputSize);
+    memzero(output, outputSize);
     free(output);
 
     return result;
@@ -66,6 +69,7 @@ size_t toHex(uint8_t v, Print &s){
 }
 
 size_t toHex(const uint8_t * array, size_t arraySize, Print &s){
+    if(array == NULL){ return 0; }
     size_t l = 0;
     for(int i=0; i<arraySize; i++){
         l += toHex(array[i], s);
@@ -75,20 +79,21 @@ size_t toHex(const uint8_t * array, size_t arraySize, Print &s){
 #endif
 
 uint8_t hexToVal(char c){
-  if(c >= '0' && c <= '9'){
-    return ((uint8_t)(c - '0')) & 0x0F;
-  }
-  if(c >= 'A' && c <= 'F'){
-    return ((uint8_t)(c-'A'+10)) & 0x0F;
-  }
-  if(c >= 'a' && c <= 'f'){
-    return ((uint8_t)(c-'a'+10)) & 0x0F;
-  }
-  return 0xFF;
+    if(c >= '0' && c <= '9'){
+        return ((uint8_t)(c - '0')) & 0x0F;
+    }
+    if(c >= 'A' && c <= 'F'){
+        return ((uint8_t)(c-'A'+10)) & 0x0F;
+    }
+    if(c >= 'a' && c <= 'f'){
+        return ((uint8_t)(c-'a'+10)) & 0x0F;
+    }
+    return 0xFF;
 }
 
 size_t fromHex(const char * hex, size_t hexLen, uint8_t * array, size_t arraySize){
-    memset(array, 0, arraySize);
+    if(array == NULL || hex == NULL){ return 0; }
+    memzero(array, arraySize);
     // ignoring all non-hex characters in the beginning
     size_t offset = 0;
     while(offset < hexLen){
@@ -112,19 +117,122 @@ size_t fromHex(const char * hex, size_t hexLen, uint8_t * array, size_t arraySiz
 }
 #if USE_STD_STRING || USE_ARDUINO_STRING
 size_t fromHex(String encoded, uint8_t * output, size_t outputSize){
+    if(output == NULL){ return 0; }
     return fromHex(encoded.c_str(), encoded.length(), output, outputSize);
 };
 #endif
 #if !(USE_ARDUINO_STRING  || USE_STD_STRING)
 size_t fromHex(const char * hex, uint8_t * array, size_t arraySize){
+    if(array == NULL || hex == NULL){ return 0; }
     return fromHex(hex, strlen(hex), array, arraySize);
 }
 #endif
 
+/******************** Binary conversion *******************/
 
+size_t fromBin(const char * bin, size_t binLen, uint8_t * array, size_t arraySize){
+    if(bin == NULL || array == NULL){ return 0; }
+    // array is big enough
+    if(arraySize*8 < binLen){
+        return 0;
+    }
+    size_t len = binLen/8;
+    if(binLen % 8 != 0){
+        len += 1; // not aligned to 8 bits
+    }
+    // zero output array
+    memzero(array, arraySize);
+    for(size_t i = 0; i < binLen; i++){
+        // we go in reverse order (from the end of the string)
+        uint8_t exp = (i%8); // shift
+        uint8_t n = (i/8); // current byte from the end
+        char c = bin[binLen-i-1];
+        if(c == '1'){
+            // set bit
+            array[len-n-1] |= (1<<exp);
+        }else if(c == '0'){
+            // correct char, nothing to do here
+        }else{
+            // wrong char
+            return 0;
+        }
+    }
+    return len;
+}
+
+size_t toBin(const uint8_t * array, size_t arraySize, char * output, size_t outputSize){
+  if(array == NULL || output == NULL){ return 0; }
+  if(outputSize < arraySize*8){
+    return 0;
+  }
+  memzero(output, outputSize);
+  for(size_t i=0; i<arraySize; i++){
+    for(size_t j=0; j<8; j++){
+      if(((array[i] >> j) & 1) == 1){
+        output[8*i+(7-j)] = '1';
+      }else{
+        output[8*i+(7-j)] = '0';
+      }
+    }
+  }
+  return 8*arraySize;
+}
+
+#if USE_ARDUINO_STRING || USE_STD_STRING
+String toBin(const uint8_t * array, size_t arraySize){
+    if(array == NULL){ return String(); }
+    size_t outputSize = arraySize * 8 + 1;
+    char * output = (char *) malloc(outputSize);
+    if(output == NULL){ return String(); }
+
+    toBin(array, arraySize, output, outputSize);
+
+    String result(output);
+
+    memzero(output, outputSize);
+    free(output);
+
+    return result;
+}
+#endif
+#if USE_ARDUINO_STRING
+size_t toBin(uint8_t v, Print &s){
+    for(int i=7; i>=0; i--){
+        if(((v>>i) & 1)==1){
+            s.print('1');
+        }else{
+            s.print('0');
+        }
+    }
+    return 8;
+}
+
+size_t toBin(const uint8_t * array, size_t arraySize, Print &s){
+    if(array == NULL){ return 0; }
+    size_t l = 0;
+    for(int i=0; i<arraySize; i++){
+        l += toBin(array[i], s);
+    }
+    return l;
+}
+#endif
+
+#if USE_STD_STRING || USE_ARDUINO_STRING
+size_t fromBin(String encoded, uint8_t * output, size_t outputSize){
+    if(output == NULL){ return 0; }
+    return fromBin(encoded.c_str(), encoded.length(), output, outputSize);
+};
+#endif
+#if !(USE_ARDUINO_STRING  || USE_STD_STRING)
+size_t fromBin(const char * hex, uint8_t * array, size_t arraySize){
+    if(hex == NULL || array == NULL){ return 0; }
+    return fromBin(hex, strlen(hex), array, arraySize);
+}
+#endif
 /******************* Base 58 conversion *******************/
 
 size_t toBase58Length(const uint8_t * array, size_t arraySize){
+    if(array == NULL){ return 0; }
     // Counting leading zeroes
     size_t zeroCount = 0;
     while(zeroCount < arraySize && !array[zeroCount]){
@@ -145,6 +253,7 @@ size_t toBase58Length(const uint8_t * array, size_t arraySize){
 }
 
 size_t toBase58(const uint8_t * array, size_t arraySize, char * output, size_t outputSize){
+    if(array == NULL || output == NULL){ return 0; }
     // Counting leading zeroes
     size_t zeroCount = 0;
     while(zeroCount < arraySize && !array[zeroCount]){
@@ -159,12 +268,12 @@ size_t toBase58(const uint8_t * array, size_t arraySize, char * output, size_t o
         return 0;
     }
 
-    memset(output, 0, outputSize);
+    memzero(output, outputSize);
 
     // array copy for manipulations
     size_t bufferSize = arraySize - zeroCount;
-    uint8_t * buffer;
-    buffer = (uint8_t *)calloc(bufferSize, sizeof(uint8_t));
+    uint8_t * buffer = (uint8_t *)calloc(bufferSize, sizeof(uint8_t));
+    if(buffer == NULL){ return 0; }
     for(size_t i = zeroCount; i < arraySize; i++){
         buffer[i - zeroCount] = array[i];
     }
@@ -204,13 +313,15 @@ size_t toBase58(const uint8_t * array, size_t arraySize, char * output, size_t o
         }
     }
     size_t l = size+zeroCount-shift;
-    memset(output + l, 0, outputSize-l);
+    memzero(output + l, outputSize-l);
     return l;
 }
 #if USE_ARDUINO_STRING || USE_STD_STRING
 String toBase58(const uint8_t * array, size_t arraySize){
+    if(array == NULL){ return String(); }
     size_t len = toBase58Length(array, arraySize) + 1; // +1 for null terminator
     char * buf = (char *)malloc(len);
+    if(buf == NULL){ return String(); }
     toBase58(array, arraySize, buf, len);
     String result(buf);
     free(buf);
@@ -219,8 +330,9 @@ String toBase58(const uint8_t * array, size_t arraySize){
 #endif
 
 size_t toBase58Check(const uint8_t * array, size_t arraySize, char * output, size_t outputSize){
-    uint8_t * arr;
-    arr = (uint8_t *) malloc(arraySize+4);
+    if(array == NULL || output == NULL){ return 0; }
+    uint8_t * arr = (uint8_t *) malloc(arraySize+4);
+    if(arr == NULL){ return 0; }
     memcpy(arr, array, arraySize);
 
     uint8_t hash[32];
@@ -228,14 +340,16 @@ size_t toBase58Check(const uint8_t * array, size_t arraySize, char * output, siz
     memcpy(arr+arraySize, hash, 4);
 
     size_t l = toBase58(arr, arraySize+4, output, outputSize);
-    memset(arr, 0, arraySize+4); // secret should not stay in RAM
+    memzero(arr, arraySize+4); // secret should not stay in RAM
     free(arr);
     return l;
 }
 #if USE_ARDUINO_STRING || USE_STD_STRING
 String toBase58Check(const uint8_t * array, size_t arraySize){
-    size_t len = toBase58Length(array, arraySize) + 5; // +4 checksum +1 for null terminator
+    if(array == NULL){ return String(); }
+    size_t len = toBase58Length(array, arraySize + 4) + 1; // +4 checksum +1 for null terminator
     char * buf = (char *)malloc(len);
+    if(buf == NULL){ return String(); }
     toBase58Check(array, arraySize, buf, len);
     String result(buf);
     free(buf);
@@ -246,12 +360,14 @@ String toBase58Check(const uint8_t * array, size_t arraySize){
 
 // TODO: add zero count, fix wrong length
 size_t fromBase58Length(const char * array, size_t arraySize){
+    if(array == NULL){ return 0; }
     size_t size = arraySize * 361 / 493 + 1;
     return size;
 }
 
 size_t fromBase58(const char * encoded, size_t encodedSize, uint8_t * output, size_t outputSize){
-    memset(output, 0, outputSize);
+    if(encoded == NULL || output == NULL){ return 0; }
+    memzero(output, outputSize);
 
     size_t l;
     // looking for the end of char array
@@ -263,8 +379,8 @@ size_t fromBase58(const char * encoded, size_t encodedSize, uint8_t * output, si
     }
     encodedSize = l;
     size_t size = fromBase58Length(encoded, encodedSize);
-    uint8_t * tmp;
-    tmp = (uint8_t *) calloc(size, sizeof(uint8_t));
+    uint8_t * tmp = (uint8_t *) calloc(size, sizeof(uint8_t));
+    if(tmp == NULL){ return 0; }
 
     uint8_t zeroCount = 0;
     for(size_t i = 0; i<encodedSize; i++){
@@ -287,6 +403,7 @@ size_t fromBase58(const char * encoded, size_t encodedSize, uint8_t * output, si
                 tmp[size-j-1] = cur%256;
             }
         }else{
+            free(tmp);
             return 0;
         }
     }
@@ -300,6 +417,7 @@ size_t fromBase58(const char * encoded, size_t encodedSize, uint8_t * output, si
         }
     }
     if(size-shift > outputSize){
+        free(tmp);
         return 0;
     }
     memcpy(output, tmp+shift, size-shift);
@@ -308,22 +426,25 @@ size_t fromBase58(const char * encoded, size_t encodedSize, uint8_t * output, si
 }
 
 size_t fromBase58Check(const char * encoded, size_t encodedSize, uint8_t * output, size_t outputSize){
-    uint8_t * arr;
-    arr = (uint8_t *) malloc(outputSize+4);
+    if(encoded == NULL || output == NULL){ return 0; }
+    uint8_t * arr = (uint8_t *) malloc(outputSize+4);
+    if(arr == NULL){ return 0; }
     size_t l = fromBase58(encoded, encodedSize, arr, outputSize+4);
     if(l<4){
+        free(arr);
         return 0;
     }
 
     uint8_t hash[32];
     doubleSha(arr, l-4, hash);
     if(memcmp(arr+l-4, hash, 4)!=0){
+        free(arr);
         return 0;
     }
 
     memcpy(output, arr, l-4);
 
-    memset(arr, 0, outputSize+4); // secret should not stay in RAM
+    memzero(arr, outputSize+4); // secret should not stay in RAM
     free(arr);
     return l-4;
 }
@@ -348,6 +469,7 @@ size_t fromBase58Check(const char * encoded, uint8_t * array, size_t arraySize){
 /******************* Base 43 conversion *******************/
 
 size_t toBase43Length(const uint8_t * array, size_t arraySize){
+    if(array == NULL){ return 0; }
     // Counting leading zeroes
     size_t zeroCount = 0;
     while(zeroCount < arraySize && !array[zeroCount]){
@@ -359,6 +481,7 @@ size_t toBase43Length(const uint8_t * array, size_t arraySize){
 }
 
 size_t toBase43(const uint8_t * array, size_t arraySize, char * output, size_t outputSize){
+    if(array == NULL || output == NULL){ return 0; }
     // Counting leading zeroes
     size_t zeroCount = 0;
     while(zeroCount < arraySize && !array[zeroCount]){
@@ -372,12 +495,12 @@ size_t toBase43(const uint8_t * array, size_t arraySize, char * output, size_t o
         return 0;
     }
 
-    memset(output, 0, outputSize);
+    memzero(output, outputSize);
 
     // array copy for manipulations
     size_t bufferSize = arraySize - zeroCount;
-    uint8_t * buffer;
-    buffer = (uint8_t *)calloc(bufferSize, sizeof(uint8_t));
+    uint8_t * buffer = (uint8_t *)calloc(bufferSize, sizeof(uint8_t));
+    if(buffer == NULL){ return 0; }
     for(size_t i = zeroCount; i < arraySize; i++){
         buffer[i - zeroCount] = array[i];
     }
@@ -417,27 +540,31 @@ size_t toBase43(const uint8_t * array, size_t arraySize, char * output, size_t o
         }
     }
     size_t l = size+zeroCount-shift;
-    memset(output + l, 0, outputSize-l);
+    memzero(output + l, outputSize-l);
     return l;
 }
 #if (USE_STD_STRING || USE_ARDUINO_STRING)
 String toBase43(const uint8_t * array, size_t arraySize){
-  size_t l = toBase43Length(array, arraySize);
-  char * output = (char *)calloc(l+1, sizeof(char));
-  toBase43(array, arraySize, output, l);
-  String s(output);
-  free(output);
-  return s;
+    if(array == NULL){ return String(); }
+    size_t l = toBase43Length(array, arraySize);
+    char * output = (char *)calloc(l+1, sizeof(char));
+    if(output == NULL){ return String(); }
+    toBase43(array, arraySize, output, l);
+    String s(output);
+    free(output);
+    return s;
 }
 #endif
 // TODO: add zero count, fix wrong length
 size_t fromBase43Length(const char * array, size_t arraySize){
+    if(array == NULL){ return 0; }
     size_t size = arraySize * 68 / 100 + 1;
     return size;
 }
 
 size_t fromBase43(const char * encoded, size_t encodedSize, uint8_t * output, size_t outputSize){
-    memset(output, 0, outputSize);
+    if(encoded == NULL || output == NULL){ return 0; }
+    memzero(output, outputSize);
 
     size_t l;
     // looking for the end of char array
@@ -449,8 +576,8 @@ size_t fromBase43(const char * encoded, size_t encodedSize, uint8_t * output, si
     }
     encodedSize = l;
     size_t size = fromBase43Length(encoded, encodedSize);
-    uint8_t * tmp;
-    tmp = (uint8_t *) calloc(size, sizeof(uint8_t));
+    uint8_t * tmp = (uint8_t *) calloc(size, sizeof(uint8_t));
+    if(tmp == NULL){ return 0; }
 
     uint8_t zeroCount = 0;
     for(size_t i = 0; i<encodedSize; i++){
@@ -473,6 +600,7 @@ size_t fromBase43(const char * encoded, size_t encodedSize, uint8_t * output, si
                 tmp[size-j-1] = cur%256;
             }
         }else{
+            free(tmp);
             return 0;
         }
     }
@@ -486,6 +614,7 @@ size_t fromBase43(const char * encoded, size_t encodedSize, uint8_t * output, si
         }
     }
     if(size-shift > outputSize){
+        free(tmp);
         return 0;
     }
     memcpy(output, tmp+shift, size-shift);
@@ -505,86 +634,125 @@ size_t fromBase43(const char * encoded, uint8_t * array, size_t arraySize){
 
 /******************* Base 64 conversion *******************/
 
-size_t toBase64Length(const uint8_t * array, size_t arraySize){
+size_t toBase64Length(const uint8_t * array, size_t arraySize, uint8_t flags){
+    if(array == NULL){ return 0; }
     size_t v = (arraySize / 3) * 4;
     if(arraySize % 3 != 0){
-        v += 4;
+        if(flags & BASE64_NOPADDING){
+            v += (arraySize % 3) + 1;
+        }else{
+            v += 4;
+        }
     }
     return v;
 }
-size_t toBase64(const uint8_t * array, size_t arraySize, char * output, size_t outputSize){
-    memset(output, 0, outputSize);
+size_t toBase64(const uint8_t * array, size_t arraySize, char * output, size_t outputSize, uint8_t flags){
+    if(array == NULL || output == NULL){ return 0; }
+    memzero(output, outputSize);
     size_t cur = 0;
-    if(outputSize < toBase64Length(array, arraySize)){
+    if(outputSize < toBase64Length(array, arraySize, flags)){
         return 0;
     }
-    while(3 * cur < arraySize - 3){
+    while(3 * cur + 3 < arraySize){
         uint32_t val = bigEndianToInt(array+3*cur, 3);
         for(uint8_t i=0; i<4; i++){
             output[4*cur + i] = BASE64_CHARS[((val >> (6*(3-i))) & 0x3F)];
         }
         cur++;
     }
+    size_t len = cur * 4;
     if(arraySize % 3 != 0){
         uint8_t rem = arraySize % 3;
-        uint32_t val = bigEndianToInt(array+3*cur, 3-rem);
+        uint32_t val = bigEndianToInt(array+3*cur, rem);
         val = val << ((3-rem) * 8);
-        for(uint8_t i=0; i<4; i++){
+        for(uint8_t i=0; i<(rem+1); i++){
             output[4*cur + i] = BASE64_CHARS[((val >> (6*(3-i))) & 0x3F)];
         }
-        memset(output + 4 * cur + 1 + rem, '=', 3-rem);
-        cur++;
+        if(flags & BASE64_NOPADDING){
+            len += (rem+1);
+        }else{
+            memset(output + 4 * cur + 1 + rem, '=', 3-rem);
+            len += 4;
+        }
     }else{
         uint32_t val = bigEndianToInt(array+3*cur, 3);
         for(uint8_t i=0; i<4; i++){
             output[4*cur + i] = BASE64_CHARS[((val >> (6*(3-i))) & 0x3F)];
         }
-        cur++;
+        len += 4;
     }
-    return 4*cur;
+    // replace with urlsafe characters
+    if(flags & BASE64_URLSAFE){
+        for(size_t i=0; i<len; i++){
+            if(output[i] == '+'){
+                output[i] = '-';
+            }
+            if(output[i] == '/'){
+                output[i] = '_';
+            }
+        }
+    }
+    return len;
 }
 #if USE_ARDUINO_STRING || USE_STD_STRING
-String toBase64(const uint8_t * array, size_t arraySize){
-    size_t len = toBase64Length(array, arraySize) + 1; // +1 for null terminator
+String toBase64(const uint8_t * array, size_t arraySize, uint8_t flags){
+    if(array == NULL){ return String(); }
+    size_t len = toBase64Length(array, arraySize, flags) + 1; // +1 for null terminator
     char * buf = (char *)malloc(len);
-    toBase64(array, arraySize, buf, len);
+    if(buf==NULL){ return String(); }
+    toBase64(array, arraySize, buf, len, flags);
     String result(buf);
     free(buf);
     return result;
 }
 #endif
-size_t fromBase64Length(const char * array, size_t arraySize){
+size_t fromBase64Length(const char * array, size_t arraySize, uint8_t flags){
+    if(array == NULL){ return 0; }
+    if(arraySize % 4 != 0 && (flags & BASE64_NOPADDING) == 0){ return 0; }
     size_t v = (arraySize / 4) * 3;
-    if(array[arraySize-1] == '='){
-        v--;
-    }
-    if(array[arraySize-2] == '='){
-        v--;
+    if(flags & BASE64_NOPADDING){
+        if(arraySize % 4 != 0){
+            v += (arraySize % 4)-1;
+        }
+    }else{
+        if(array[arraySize-1] == '='){
+            v--;
+        }
+        if(array[arraySize-2] == '='){
+            v--;
+        }
     }
     return v;
 }
-size_t fromBase64(const char * encoded, size_t encodedSize, uint8_t * output, size_t outputSize){
+size_t fromBase64(const char * encoded, size_t encodedSize, uint8_t * output, size_t outputSize, uint8_t flags){
+    if(encoded == NULL || output == NULL){ return 0; }
     size_t cur = 0;
-    memset(output, 0, outputSize);
-    if(outputSize < fromBase64Length(encoded, encodedSize)){
+    memzero(output, outputSize);
+    if(outputSize < fromBase64Length(encoded, encodedSize, flags)){
         return 0;
     }
     while(cur*4 < encodedSize){
-        if(cur*4+3 >= encodedSize){
-            memset(output, 0, outputSize);
+        if(cur*4+3 >= encodedSize && (flags & BASE64_NOPADDING) == 0){
+            memzero(output, outputSize);
             return 0;
         }
         uint32_t val = 0;
         for(size_t i=0; i<4; i++){
-            const char * pch = strchr(BASE64_CHARS, encoded[cur*4+i]);
-            if(pch!=NULL){
-                val = (val << 6) + ((pch - BASE64_CHARS) & 0x3F);
-            }else{
-                if(encoded[cur*4+i] == '='){
+            char c = encoded[cur*4+i];
+            // replace characters for urlsafe version
+            if(c=='-' && (flags & BASE64_URLSAFE)){
+                c = '+';
+            }
+            if(c=='_' && (flags & BASE64_URLSAFE)){
+                c = '/';
+            }
+            const char * pch = strchr(BASE64_CHARS, c);
+            if(pch==NULL || ((flags & BASE64_NOPADDING) && (c == 0))){
+                if((encoded[cur*4+i] == '=') || (c == 0 && (flags & BASE64_NOPADDING))){
                     if(i==3){
                         val = (val >> 2);
                         if(outputSize < 3*cur+2){
-                            memset(output, 0, outputSize);
+                            memzero(output, outputSize);
                             return 0;
                         }
                         intToBigEndian(val, output+3*cur, 2);
@@ -593,19 +761,22 @@ size_t fromBase64(const char * encoded, size_t encodedSize, uint8_t * output, si
                     if(i==2){
                         val = (val >> 4);
                         if(outputSize < 3*cur+1){
-                            memset(output, 0, outputSize);
+                            memzero(output, outputSize);
                             return 0;
                         }
                         output[3*cur] = (val & 0xFF);
                         return 3*cur + 1;
                     }
                 }
-                memset(output, 0, outputSize);
+                memzero(output, outputSize);
                 return 0;
+            }else{
+                val = (val << 6) + ((pch - BASE64_CHARS) & 0x3F);
             }
         }
         if(outputSize < 3*(cur+1)){
-            memset(output, 0, outputSize);
+            memzero(output, outputSize);
+            printf("6 %lu < 3* %lu+1\n", outputSize, cur);
             return 0;
         }
         intToBigEndian(val, output+3*cur, 3);
@@ -614,29 +785,32 @@ size_t fromBase64(const char * encoded, size_t encodedSize, uint8_t * output, si
     return 3 * cur;
 }
 #if USE_STD_STRING || USE_ARDUINO_STRING
-size_t fromBase64(String encoded, uint8_t * output, size_t outputSize){
-    return fromBase64(encoded.c_str(), encoded.length(), output, outputSize);
+size_t fromBase64(String encoded, uint8_t * output, size_t outputSize, uint8_t flags){
+    return fromBase64(encoded.c_str(), encoded.length(), output, outputSize, flags);
 };
-String base64ToHex(String b64){
-    size_t len = fromBase64Length(b64.c_str(), strlen(b64.c_str())) + 1; // +1 for null terminator
+String base64ToHex(String b64, uint8_t flags){
+    size_t len = fromBase64Length(b64.c_str(), strlen(b64.c_str()), flags) + 1; // +1 for null terminator
     uint8_t * buf = (uint8_t *)malloc(len);
-    len = fromBase64(b64, buf, len);
+    if(buf==NULL){ return String(); }
+    len = fromBase64(b64, buf, len, flags);
     String result = toHex(buf, len);
     free(buf);
     return result;
 };
-String hexToBase64(String hex){
+String hexToBase64(String hex, uint8_t flags){
     size_t len = strlen(hex.c_str())/2+1; // +1 for null terminator
     uint8_t * buf = (uint8_t *)malloc(len);
+    if(buf==NULL){ return String(); }
     len = fromHex(hex, buf, len);
-    String result = toBase64(buf, len);
+    String result = toBase64(buf, len, flags);
     free(buf);
     return result;
 };
 #endif
 #if !(USE_ARDUINO_STRING  || USE_STD_STRING)
-size_t fromBase64(const char * b64, uint8_t * array, size_t arraySize){
-    return fromBase64(b64, strlen(b64), array, arraySize);
+size_t fromBase64(const char * b64, uint8_t * array, size_t arraySize, uint8_t flags){
+    if(b64 == NULL || array == NULL){ return 0; }
+    return fromBase64(b64, strlen(b64), array, arraySize, flags);
 }
 #endif
 

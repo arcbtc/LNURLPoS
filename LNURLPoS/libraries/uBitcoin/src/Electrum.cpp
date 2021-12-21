@@ -2,6 +2,7 @@
 
 ElectrumTx::ElectrumTx(ElectrumTx const &other){
     tx = other.tx;
+    is_segwit = false;
     txInsMeta = new ElectrumInputMetadata[tx.inputsNumber];
     for(unsigned int i=0; i<tx.inputsNumber; i++){
         txInsMeta[i] = other.txInsMeta[i];
@@ -10,6 +11,7 @@ ElectrumTx::ElectrumTx(ElectrumTx const &other){
     bytes_parsed = other.bytes_parsed;
 }
 ElectrumTx& ElectrumTx::operator=(ElectrumTx const &other){
+    if (this == &other){ return *this; } // self-assignment
     if(tx.inputsNumber > 0){
         delete [] txInsMeta;
     }
@@ -105,7 +107,7 @@ size_t ElectrumTx::from_stream(ParseStream *s){
             start += 5;
             while(s->available() && bytes_parsed+bytes_read < start + 8){
                 uint8_t c = s->read();
-                txInsMeta[i].amount += (c << (8*(bytes_read+bytes_parsed-start)));
+                txInsMeta[i].amount += (((uint64_t)c) << (8*(bytes_read+bytes_parsed-start)));
                 bytes_read++;
             }
             start += 8;

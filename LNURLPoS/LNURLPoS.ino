@@ -358,7 +358,6 @@ void displayBatteryVoltage()
 }
 
 //////////LNURL AND CRYPTO///////////////
-////VERY KINDLY DONATED BY SNIGIREV!/////
 
 void makeLNURL()
 {
@@ -366,14 +365,13 @@ void makeLNURL()
   byte nonce[8];
   for (int i = 0; i < 8; i++)
   {
-    nonce[i] = random(9);
+    nonce[i] = random(256);
   }
-  byte payload[8];
-  encode_data(payload, nonce, randomPin, inputs.toInt());
-  preparedURL = baseURL + "?n=";
-  preparedURL += toHex(nonce, 8);
-  preparedURL += "&p=";
-  preparedURL += toHex(payload, 8);
+  byte payload[51]; // 51 bytes is max one can get with xor-encryption
+  // TODO: change currency_byte according to the currency defined at the top of the sketch
+  size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)key.c_str(), key.length(), nonce, sizeof(nonce), randomPin, inputs.toInt(), (byte)'$');
+  preparedURL = baseURL + "?p=";
+  preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
   Serial.println(preparedURL);
   char Buf[200];
   preparedURL.toCharArray(Buf, 200);
@@ -388,26 +386,54 @@ void makeLNURL()
   Serial.println(lnurl);
 }
 
-void encode_data(byte output[8], byte nonce[8], int pin, int amount_in_cents)
-{
-  byte hashresult[32];
-  SHA256 h;
-  h.beginHMAC((uint8_t *)key.c_str(), key.length());
-  h.write(nonce, 8);
-  h.endHMAC(hashresult);
-  memcpy(output, hashresult, 8);
-  // first two bytes are xor of the key with PIN code
-  output[0] = output[0] ^ ((byte)(pin & 0xFF));
-  output[1] = output[1] ^ ((byte)(pin >> 8));
-  // next 4 bytes is amount in cents in little-endian
-  for (int i = 0; i < 4; i++)
-  {
-    output[2 + i] = output[2 + i] ^ ((byte)(amount_in_cents & 0xFF));
-    amount_in_cents = amount_in_cents >> 8;
+/*
+ * Fills output with nonce, xored payload, and HMAC.
+ * XOR is secure for data smaller than the key size (it's basically one-time-pad). For larger data better to use AES.
+ * Maximum length of the output in XOR mode is 1+1+nonce_len+1+32+8 = nonce_len+43 = 51 for 8-byte nonce.
+ * Payload contains pin, currency byte and amount. Pin and amount are encoded as compact int (varint).
+ * Currency byte is '$' for USD cents, 's' for satoshi, 'E' for euro cents.
+ * Returns number of bytes written to the output, 0 if error occured.
+ */
+int xor_encrypt(uint8_t * output, size_t outlen, uint8_t * key, size_t keylen, uint8_t * nonce, size_t nonce_len, uint64_t pin, uint64_t amount_in_cents, uint8_t currency_byte){
+  // check we have space for all the data:
+  // <variant_byte><len|nonce><len|payload:{pin}{currency_byte}{amount}><hmac>
+  if(outlen < 2 + nonce_len + 1 + lenVarInt(pin) + 1 + lenVarInt(amount_in_cents) + 8){
+    return 0;
   }
-  // last two bytes are two bytes of hmac(key, output[:6])
-  h.beginHMAC((uint8_t *)key.c_str(), key.length());
-  h.write(output, 6);
-  h.endHMAC(hashresult);
-  memcpy(output + 6, hashresult, 2);
+  int cur = 0;
+  output[cur] = 1; // variant: XOR encryption
+  cur++;
+  // nonce_len | nonce
+  output[cur] = nonce_len;
+  cur++;
+  memcpy(output+cur, nonce, nonce_len);
+  cur += nonce_len;
+  // payload, unxored first - <pin><currency byte><amount>
+  int payload_len = lenVarInt(pin) + 1 + lenVarInt(amount_in_cents);
+  output[cur] = (uint8_t)payload_len;
+  cur++;
+  uint8_t * payload = output+cur; // pointer to the start of the payload
+  cur += writeVarInt(pin, output+cur, outlen-cur); // pin code
+  output[cur] = currency_byte;
+  cur++;
+  cur += writeVarInt(amount_in_cents, output+cur, outlen-cur); // amount
+  // xor it with round key
+  uint8_t hmacresult[32];
+  SHA256 h;
+  h.beginHMAC(key, keylen);
+  h.write((uint8_t *)"Round secret:", 13);
+  h.write(nonce, nonce_len);
+  h.endHMAC(hmacresult);
+  for(int i=0; i < payload_len; i++){
+    payload[i] = payload[i] ^ hmacresult[i];
+  }
+  // add hmac to authenticate
+  h.beginHMAC(key, keylen);
+  h.write((uint8_t *)"Data:", 5);
+  h.write(output, cur);
+  h.endHMAC(hmacresult);
+  memcpy(output+cur, hmacresult, 8);
+  cur += 8;
+  // return number of bytes written to the output
+  return cur;
 }
