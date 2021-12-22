@@ -10,30 +10,26 @@
 #include <WiFi.h>
 #include "esp_adc_cal.h"
 
-
 ////////////////////////////////////////////////////////
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-// String baseURL = "https://fastapi.satoshigo.app/lnurlpos/api/v1/lnurl/8vMSF3EsX8fvN9CzGtEXj6";
-// String key = "BHUjF46VKrJ83xc4A7cnbQ";
-// String currency = "USD";
-String baseURL = "https://lnbits.anchorhodl.com/lnurlpos/api/v1/lnurl/ZjdjH5zWi7RtsuwiK3fHQT";
-String key = "cEeREiYLPCdDLMv6VPGZBa";
-String currency = "GBP";
+String baseURL = "https://fastapi.satoshigo.app/lnurlpos/api/v1/lnurl/8vMSF3EsX8fvN9CzGtEXj6";
+String key = "BHUjF46VKrJ83xc4A7cnbQ";
+String currency = "USD";
 
 //////////////KEYPAD///////////////////
-bool isLilyGoKeyboard = true;
+bool isLilyGoKeyboard = false;
 
 //////////////SLEEP SETTINGS///////////////////
 bool isSleepEnabled = true;
-int sleepTimer = 5; // Time in seconds before the device goes to sleep
+int sleepTimer = 30; // Time in seconds before the device goes to sleep
 
 //////////////QR DISPLAY BRIGHTNESS///////////////////
 int qrScreenBrightness = 180; // 0 = min, 255 = max
 
 //////////////BATTERY///////////////////
-const bool shouldDisplayBatteryLevel = true; // Display the battery level on the display?
+const bool shouldDisplayBatteryLevel = false; // Display the battery level on the display?
 const float batteryMaxVoltage = 4.2; // The maximum battery voltage. Used for battery percentage calculation
 const float batteryMinVoltage = 3.73; // The minimum battery voltage that we tolerate before showing the warning
 
