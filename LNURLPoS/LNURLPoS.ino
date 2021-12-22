@@ -8,22 +8,39 @@
 #include <Base64.h>
 #include <Hash.h>
 #include <Conversion.h>
+#include <WiFi.h>
+#include "esp_adc_cal.h"
+
 
 ////////////////////////////////////////////////////////
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-String server = "https://legend.lnbits.com";
-String posId = "JXMhZd8iQFWV9inTsb6vKc";
-String key = "Enrt4QzajadmSu6hbwTxFz";
-String currency = "USD"; 
+String server = "https://lnbits.anchorhodl.com";
+String posId = "ZjdjH5zWi7RtsuwiK3fHQT";
+String key = "cEeREiYLPCdDLMv6VPGZBa";
+String currency = "GBP"; 
+
+//////////////KEYPAD///////////////////
+bool isLilyGoKeyboard = true;
+
+//////////////SLEEP SETTINGS///////////////////
+bool isSleepEnabled = true;
+int sleepTimer = 5; // Time in seconds before the device goes to sleep
+
+//////////////QR DISPLAY BRIGHTNESS///////////////////
+int qrScreenBrightness = 180; // 0 = min, 255 = max
+
+//////////////BATTERY///////////////////
+const bool shouldDisplayBatteryLevel = true; // Display the battery level on the display?
+const float batteryMaxVoltage = 4.2; // The maximum battery voltage. Used for battery percentage calculation
+const float batteryMinVoltage = 3.73; // The minimum battery voltage that we tolerate before showing the warning
 
 ////////////////////////////////////////////////////////
 ////Note: See lines 75, 97, to adjust to keypad size////
 ////////////////////////////////////////////////////////
 
 //////////////VARIABLES///////////////////
-
 String dataId = "";
 bool paid = false;
 bool shouldSaveConfig = false;
@@ -48,6 +65,9 @@ String payreq;
 int randomPin;
 bool settle = false;
 String preparedURL;
+RTC_DATA_ATTR int bootCount = 0;
+long timeOfLastInteraction = millis();
+bool isPretendSleeping = false;
 
 #include "MyFont.h"
 
@@ -61,11 +81,7 @@ TFT_eSPI tft = TFT_eSPI();
 SHA256 h;
 
 // QR screen colours
-int qrScreenBrightness = 180;
 uint16_t qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
-
-//////////////BATTERY///////////////////
-const bool shouldDisplayBatteryLevel = true; // Display the battery level on the display?
 
 //////////////KEYPAD///////////////////
 
@@ -83,46 +99,58 @@ char keys[rows][cols] = {
 //byte colPins[cols] = {17, 22, 21}; //connect to the column pinouts of the keypad
 
 //LilyGO T-Display-Keyboard
-//byte rowPins[rows] = {21, 27, 26, 22}; //connect to the row pinouts of the keypad
-//byte colPins[cols] = {33, 32, 25}; //connect to the column pinouts of the keypad
+byte rowPins[rows] = {21, 27, 26, 22}; //connect to the row pinouts of the keypad
+byte colPins[cols] = {33, 32, 25}; //connect to the column pinouts of the keypad
 
 // 4 x 4 keypad setup
 //byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
 //byte colPins[cols] = {15, 13, 12}; //connect to the column pinouts of the keypad
 
 //Small keypad setup
-byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
-byte colPins[cols] = {15, 13, 12}; //connect to the column pinouts of the keypad
+//byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
+//byte colPins[cols] = {15, 13, 12}; //connect to the column pinouts of the keypad
 
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, rows, cols );
 int checker = 0;
 char maxdig[20];
 
-
 //////////////MAIN///////////////////
 
 void setup(void) {
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode (2, OUTPUT);
   digitalWrite(2, HIGH);
+  btStop();
+  WiFi.mode(WIFI_OFF);
   h.begin();
   tft.begin();
   
   //Set to 3 for bigger keypad
   tft.setRotation(1);
-  
-  logo();
-  delay(3000);
+
+  if(bootCount == 0) {
+    logo();
+    delay(1000);
+  } else {
+    wakeAnimation();
+  }
+  ++bootCount;
+  Serial.println("Boot count" + bootCount);
 }
 
 void loop() {
+  maybeSleepDevice();
   inputs = "";
   settle = false;
   displaySats(); 
   bool cntr = false;
   while (cntr != true){
+    maybeSleepDevice();
+    displayBatteryVoltage(false);
    char key = keypad.getKey();
    if (key != NO_KEY){
+    isPretendSleeping = false;
+    timeOfLastInteraction = millis();
      virtkey = String(key);
        if (virtkey == "#"){
         makeLNURL();
@@ -131,19 +159,23 @@ void loop() {
          while (settle != true){
            virtkey = String(keypad.getKey());
            if (virtkey == "*"){
+            timeOfLastInteraction = millis();
             tft.fillScreen(TFT_BLACK);
             settle = true;
             cntr = true;
            }
            else if (virtkey == "#"){
+            timeOfLastInteraction = millis();
             showPin();
            }
            // Handle screen brighten on QR screen
            else if (virtkey == "1"){
+            timeOfLastInteraction = millis();
             adjustQrBrightness("increase");
            }
            // Handle screen dim on QR screen
            else if (virtkey == "4"){
+            timeOfLastInteraction = millis();
             adjustQrBrightness("decrease");
            }
          }
@@ -210,10 +242,10 @@ void showPin()
   tft.fillScreen(TFT_BLACK);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setFreeFont(SMALLFONT);
-  tft.setCursor(0, 20);
+  tft.setCursor(30, 25);
   tft.println("PAYMENT PROOF PIN");
   tft.setCursor(60, 80);
-  tft.setTextColor(TFT_RED, TFT_BLACK); 
+  tft.setTextColor(TFT_PURPLE, TFT_BLACK); 
   tft.setFreeFont(BIGFONT);
   tft.println(randomPin);
 }
@@ -236,10 +268,10 @@ void displaySats(){
   tft.setFreeFont(MIDBIGFONT);
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
   tft.println(amount);
-  
-  displayBatteryVoltage();
+
+  displayBatteryVoltage(true);
         
-  delay(100);
+  delay(50);
   virtkey = "";
 }
 
@@ -265,30 +297,169 @@ void to_upper(char * arr){
   }
 }
 
+long lastBatteryUpdate = millis();
+int batteryLevelUpdatePeriod = 10; // update every X seconds
 /**
  * Display the battery voltage
  */
-void displayBatteryVoltage(){
-  if(shouldDisplayBatteryLevel) {
-    delay(10);
-    uint16_t v1 = analogRead(34);
-    float v1Voltage = ((float)v1 / 4095.0f) * 2.0f * 3.3f * (1100.0f / 1000.0f);
+void displayBatteryVoltage(bool forceUpdate)
+{
+  long currentTime = millis();
+  if (
+    (shouldDisplayBatteryLevel
+    &&
+    (currentTime > (lastBatteryUpdate + batteryLevelUpdatePeriod * 1000))
+    &&
+    !isPoweredExternally()
+    )
+    ||
+    (shouldDisplayBatteryLevel && forceUpdate && !isPoweredExternally())
+    )
+  {
+    lastBatteryUpdate = currentTime;
+    bool showBatteryVoltage = false;
+    float batteryCurV = getInputVoltage();
+    float batteryAllowedRange = batteryMaxVoltage - batteryMinVoltage;
+    float batteryCurVAboveMin = batteryCurV - batteryMinVoltage;
 
-    String batteryVoltage = String(v1Voltage);
-    // 80%
-    if(v1Voltage >= 4.02) {
-      tft.setTextColor(TFT_GREEN, TFT_BLACK); 
-    } 
-    // 50%
-    else if(v1Voltage >= 3.84) {
-        tft.setTextColor(TFT_YELLOW, TFT_BLACK); 
-    } else {
-       tft.setTextColor(TFT_RED, TFT_BLACK);  
+    int batteryPercentage = (int)(batteryCurVAboveMin / batteryAllowedRange * 100);
+
+    if(batteryPercentage > 100) {
+      batteryPercentage = 100;
     }
+
+    int textColour = TFT_GREEN;
+    if (batteryPercentage > 70) {
+      textColour = TFT_GREEN;
+    }
+    else if (batteryPercentage > 30)
+    {
+      textColour = TFT_YELLOW;
+    }
+    else
+    {
+      textColour = TFT_RED;
+    }
+
+    tft.setTextColor(textColour, TFT_BLACK);
     tft.setFreeFont(SMALLFONT);
-    tft.setCursor(195, 16);
-    tft.print(batteryVoltage);
+
+    int textXPos = 195;
+    if(batteryPercentage < 100) {
+      textXPos = 200;
+    }
+
+    // Clear the area of the display where the battery level is shown
+    tft.fillRect(textXPos - 2, 0, 50, 20, TFT_BLACK);
+    tft.setCursor(textXPos, 16);
+
+    // Is the device charging?
+    if(isPoweredExternally()) {
+      tft.print("CHRG");
+    }
+    // Show the current voltage
+    if(batteryPercentage > 10) {
+      tft.print(String(batteryPercentage) + "%");
+    }
+    else {
+      tft.print("LO!");
+    }
+
+    if(showBatteryVoltage) {
+      tft.setFreeFont(SMALLFONT);
+      tft.setCursor(155, 36);
+      tft.print(String(batteryCurV) + "v");
+    }
+
   }
+}
+
+/**
+ * Check whether the device should be put to sleep and put it to sleep
+ * if it should
+ */
+void maybeSleepDevice() {
+  if(isSleepEnabled && !isPretendSleeping) {
+    long currentTime = millis();
+    if(currentTime > (timeOfLastInteraction + sleepTimer * 1000)) {
+      sleepAnimation();
+      // The device wont charge if it is sleeping, so when charging, do a pretend sleep
+      if(isPoweredExternally()) {
+        Serial.println("Pretend sleep now");
+        isPretendSleeping = true;
+        tft.fillScreen(TFT_BLACK);
+      }
+      else {
+        if(isLilyGoKeyboard) {
+          esp_sleep_enable_ext0_wakeup(GPIO_NUM_33,1); //1 = High, 0 = Low
+        } else {
+          //Configure Touchpad as wakeup source
+          touchAttachInterrupt(T3, callback, 40);
+          esp_sleep_enable_touchpad_wakeup();
+        }
+        Serial.println("Going to sleep now");
+        esp_deep_sleep_start();
+      }
+    }
+  }
+}
+
+void callback(){
+}
+
+/**
+ * Awww. Show the go to sleep animation
+ */
+void sleepAnimation() {
+    printSleepAnimationFrame("(o.o)", 500);
+    printSleepAnimationFrame("(-.-)", 500);
+    printSleepAnimationFrame("(-.-)z", 250);
+    printSleepAnimationFrame("(-.-)zz", 250);
+    printSleepAnimationFrame("(-.-)zzz", 250);
+    tft.fillScreen(TFT_BLACK);
+}
+
+void wakeAnimation() {
+    printSleepAnimationFrame("(-.-)", 100);
+    printSleepAnimationFrame("(o.o)", 200);
+    tft.fillScreen(TFT_BLACK);
+}
+
+/**
+ * Print the line of the animation
+ */
+void printSleepAnimationFrame(String text, int wait) {
+  tft.fillScreen(TFT_BLACK);
+  tft.setCursor(5, 80);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK); 
+  tft.setFreeFont(BIGFONT);
+  tft.println(text);
+  delay(wait);
+}
+
+/**
+ * Get the voltage going to the device
+ */
+float getInputVoltage() {
+    delay(100);
+    uint16_t v1 = analogRead(34);
+    return ((float)v1 / 4095.0f) * 2.0f * 3.3f * (1100.0f / 1000.0f);
+}
+
+/**
+ * Does the device have external or internal power?
+ */
+bool isPoweredExternally() {
+  float inputVoltage = getInputVoltage();
+  if(inputVoltage > 4.5)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+  
 }
 
 //////////LNURL AND CRYPTO///////////////
