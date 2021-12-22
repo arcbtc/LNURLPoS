@@ -113,7 +113,7 @@ char maxdig[20];
 //////////////MAIN///////////////////
 
 void setup(void) {
-  Serial.begin(115200);
+  Serial.begin(115200);  
   pinMode (2, OUTPUT);
   digitalWrite(2, HIGH);
   btStop();
@@ -124,10 +124,13 @@ void setup(void) {
   //Set to 3 for bigger keypad
   tft.setRotation(1);
 
-  if(bootCount == 0) {
+  if(bootCount == 0)
+  {
     logo();
     delay(3000);
-  } else {
+  }
+  else
+  {
     wakeAnimation();
   }
   ++bootCount;
@@ -144,40 +147,40 @@ void loop() {
   while (cntr != true){
     maybeSleepDevice();
     displayBatteryVoltage(false);
-   char key = keypad.getKey();
-   if (key != NO_KEY){
-    isPretendSleeping = false;
-    timeOfLastInteraction = millis();
-     virtkey = String(key);
-       if (virtkey == "#"){
+    char key = keypad.getKey();
+    if (key != NO_KEY)
+    {
+      isPretendSleeping = false;
+      timeOfLastInteraction = millis();
+      virtkey = String(key);
+      if (virtkey == "#"){
         makeLNURL();
         qrShowCode();
         int counta = 0;
-         while (settle != true){
-           virtkey = String(keypad.getKey());
-           if (virtkey == "*"){
+        while (settle != true){
+          virtkey = String(keypad.getKey());
+          if (virtkey == "*"){
             timeOfLastInteraction = millis();
             tft.fillScreen(TFT_BLACK);
             settle = true;
             cntr = true;
-           }
-           else if (virtkey == "#"){
+          }
+          else if (virtkey == "#"){
             timeOfLastInteraction = millis();
             showPin();
-           }
-           // Handle screen brighten on QR screen
-           else if (virtkey == "1"){
+          }
+          // Handle screen brighten on QR screen
+          else if (virtkey == "1"){
             timeOfLastInteraction = millis();
             adjustQrBrightness("increase");
-           }
-           // Handle screen dim on QR screen
-           else if (virtkey == "4"){
+          }
+          // Handle screen dim on QR screen
+          else if (virtkey == "4"){
             timeOfLastInteraction = millis();
             adjustQrBrightness("decrease");
           }
         }
       }
-
       else if (virtkey == "*")
       {
         tft.fillScreen(TFT_BLACK);
@@ -189,7 +192,7 @@ void loop() {
         virtkey = "";
         cntr = "2";
       }
-      displaySats();
+    displaySats();
     }
   }
 }
@@ -204,14 +207,20 @@ void adjustQrBrightness(String direction)
       qrScreenBrightness = 255;
     }
   }
+  else if (direction == "decrease" && qrScreenBrightness <= 30)
+  {
+    qrScreenBrightness = qrScreenBrightness - 5;
+  }
   else if (direction == "decrease" && qrScreenBrightness <= 255)
   {
     qrScreenBrightness = qrScreenBrightness - 25;
-    if (qrScreenBrightness < 0)
-    {
-      qrScreenBrightness = 5;
-    }
   }
+  
+  if (qrScreenBrightness < 4)
+  {
+    qrScreenBrightness = 4;
+  }
+  
   qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
   qrShowCode();
 }
@@ -228,7 +237,6 @@ void qrShowCode()
   qrcode_initText(&qrcode, qrcodeData, 6, 0, lnurlChar);
   for (uint8_t y = 0; y < qrcode.size; y++)
   {
-
     // Each horizontal module
     for (uint8_t x = 0; x < qrcode.size; x++)
     {
