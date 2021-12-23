@@ -17,12 +17,13 @@
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-
-
 String server = "https://api.rapaygo.com";
-String posId = "CARSjVUFTmCQhGt5EAHkXS";
-String key = "AQ9eA4iwUg3vg4z5mapeP8";
+String posId = "sooper";
+String key = "secret";
 String currency = "USD";
+String walletId = "a1627";
+
+
 
 ////////////////////////////////////////////////////////
 ////Note: See lines 75, 97, to adjust to keypad size////
@@ -282,6 +283,9 @@ void logo() {
   tft.setFreeFont(SMALLFONT);
   tft.setCursor(7, 90);      // To be compatible with Adafruit_GFX the cursor datum is always bottom left
   tft.print("https://rapaygo.com");         // Using tft.print means text background is NEVER rendered
+  tft.setCursor(7, 105);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.print("id: "+String(walletId));
   displayBatteryVoltage();
 }
 
@@ -318,6 +322,9 @@ void displayBatteryVoltage() {
     tft.setCursor(195, 16);
 
     int percent = round(((float)v1Voltage / 5.0f) * 100.0f);
+    if(percent>100){
+      percent = 100;
+    }
     String batteryPercent = String(percent);
     tft.print(batteryPercent);
   }
