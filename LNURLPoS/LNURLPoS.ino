@@ -192,7 +192,7 @@ void loop() {
         virtkey = "";
         cntr = "2";
       }
-    displaySats();
+      displaySats();
     }
   }
 }
@@ -277,13 +277,23 @@ void displaySats()
   tft.println("TO RESET PRESS *");
 
   inputs += virtkey;
-  float amount = float(inputs.toInt()) / 100;
+  
   tft.setFreeFont(MIDFONT);
   tft.setCursor(0, 80);
   tft.print(String(currency) + ":");
   tft.setFreeFont(MIDBIGFONT);
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  tft.println(amount);
+
+  if(currency != "sats")
+  {
+    float amount = float(inputs.toInt()) / 100;
+    tft.println(amount);
+  }
+  else
+  {
+    int amount = inputs.toInt();
+    tft.println(amount);
+  }
 
   displayBatteryVoltage(true);
   delay(50);
