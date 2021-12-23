@@ -285,7 +285,7 @@ void displaySats()
   tft.setFreeFont(MIDBIGFONT);
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
 
-  if(currency != "sat")
+  if(currency != "sats")
   {
     float amount = float(inputs.toInt()) / 100;
     tft.println(amount);
