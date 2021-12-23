@@ -277,8 +277,7 @@ void displaySats()
   tft.println("TO RESET PRESS *");
 
   inputs += virtkey;
- 
- 
+  
   tft.setFreeFont(MIDFONT);
   tft.setCursor(0, 80);
   tft.print(String(currency) + ":");
