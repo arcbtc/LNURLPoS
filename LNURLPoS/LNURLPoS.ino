@@ -1,5 +1,6 @@
 
 #include "SPI.h"
+#include "FS.h"
 #include "TFT_eSPI.h"
 #include <Keypad.h>
 #include <string.h>
@@ -9,17 +10,19 @@
 #include <Conversion.h>
 #include <WiFi.h>
 #include "esp_adc_cal.h"
+#include "SPIFFS.h"
+
 
 ////////////////////////////////////////////////////////
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-String baseURL = "https://fastapi.satoshigo.app/lnurlpos/api/v1/lnurl/8vMSF3EsX8fvN9CzGtEXj6";
-String key = "BHUjF46VKrJ83xc4A7cnbQ";
-String currency = "USD";
+String baseURL = "https://lnbits.anchorhodl.com/lnurlpos/api/v1/lnurl/2XcN4QN4HfdEN54f2WGeC5";
+String key = "KNoSdgqR9NyrYx4owBuQGa";
+String currency = "sats";
 
 //////////////KEYPAD///////////////////
-bool isLilyGoKeyboard = false;
+bool isLilyGoKeyboard = true;
 
 //////////////SLEEP SETTINGS///////////////////
 bool isSleepEnabled = true;
@@ -73,6 +76,7 @@ bool isPretendSleeping = false;
 #define MIDFONT &FreeMonoBold12pt7b
 #define SMALLFONT &FreeMonoBold9pt7b
 #define TINYFONT &TomThumb
+#define FORMAT_SPIFFS_IF_FAILED true
 
 TFT_eSPI tft = TFT_eSPI();
 SHA256 h;
@@ -95,16 +99,16 @@ char keys[rows][cols] = {
 //byte colPins[cols] = {17, 22, 21}; //connect to the column pinouts of the keypad
 
 //LilyGO T-Display-Keyboard
-//byte rowPins[rows] = {21, 27, 26, 22}; //connect to the row pinouts of the keypad
-//byte colPins[cols] = {33, 32, 25}; //connect to the column pinouts of the keypad
+byte rowPins[rows] = {21, 27, 26, 22}; //connect to the row pinouts of the keypad
+byte colPins[cols] = {33, 32, 25}; //connect to the column pinouts of the keypad
 
 // 4 x 4 keypad setup
 //byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
 //byte colPins[cols] = {15, 13, 12}; //connect to the column pinouts of the keypad
 
 //Small keypad setup
-byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
-byte colPins[cols] = {15, 13, 12};    //connect to the column pinouts of the keypad
+//byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
+//byte colPins[cols] = {15, 13, 12};    //connect to the column pinouts of the keypad
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, rows, cols);
 int checker = 0;
@@ -113,7 +117,7 @@ char maxdig[20];
 //////////////MAIN///////////////////
 
 void setup(void) {
-  Serial.begin(115200);  
+  Serial.begin(9600);  
   pinMode (2, OUTPUT);
   digitalWrite(2, HIGH);
   btStop();
@@ -123,6 +127,15 @@ void setup(void) {
 
   //Set to 3 for bigger keypad
   tft.setRotation(1);
+
+    Serial.println("mounting FS...");
+    
+  while(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)){
+    Serial.println("failed to mount FS");
+    delay(200);
+   }
+
+  loadConfig();  
 
   if(bootCount == 0)
   {
@@ -223,6 +236,10 @@ void adjustQrBrightness(String direction)
   
   qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
   qrShowCode();
+  
+        File configFile = SPIFFS.open("/config.txt", "w");
+      configFile.print(String(qrScreenBrightness));
+      configFile.close();
 }
 
 ///////////DISPLAY///////////////
@@ -487,6 +504,24 @@ bool isPoweredExternally() {
     return false;
   }
   
+}
+
+/**
+ * Load stored config values
+ */
+void loadConfig() {
+  File file = SPIFFS.open("/config.txt");
+   spiffing = file.readStringUntil('\n');
+  String tempQrScreenBrightness = spiffing.c_str();
+  int tempQrScreenBrightnessInt = tempQrScreenBrightness.toInt();
+  Serial.println("spiffcontent " + String(tempQrScreenBrightnessInt));
+  file.close();
+
+  if(tempQrScreenBrightnessInt && tempQrScreenBrightnessInt > 3) {
+    qrScreenBrightness = tempQrScreenBrightnessInt;
+  }
+  Serial.println("qrScreenBrightness from config " + String(qrScreenBrightness));
+  qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
 }
 
 //////////LNURL AND CRYPTO///////////////
