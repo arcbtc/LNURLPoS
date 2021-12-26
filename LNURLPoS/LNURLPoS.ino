@@ -14,8 +14,8 @@
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-String baseURL = "https://fastapi.satoshigo.app/lnurlpos/api/v1/lnurl/8vMSF3EsX8fvN9CzGtEXj6";
-String key = "BHUjF46VKrJ83xc4A7cnbQ";
+String baseURL = "https://legend.lnbits.com/lnurlpos/api/v1/lnurl/PESRKMbNXkfhYgwRxUz2of";
+String key = "YSzNpCCWStxPnjv244eaBr";
 String currency = "USD";
 
 //////////////KEYPAD///////////////////
@@ -113,7 +113,9 @@ char maxdig[20];
 //////////////MAIN///////////////////
 
 void setup(void) {
-  Serial.begin(115200);  
+  Serial.begin(115200); 
+  pinMode(4,OUTPUT); 
+  digitalWrite(4,HIGH);
   pinMode (2, OUTPUT);
   digitalWrite(2, HIGH);
   btStop();
@@ -138,6 +140,7 @@ void setup(void) {
 }
 
 void loop() {
+  digitalWrite(4,HIGH);
   maybeSleepDevice();
   inputs = "";
   settle = false;
@@ -443,7 +446,7 @@ void sleepAnimation() {
     printSleepAnimationFrame("(-.-)z", 250);
     printSleepAnimationFrame("(-.-)zz", 250);
     printSleepAnimationFrame("(-.-)zzz", 250);
-    tft.fillScreen(TFT_BLACK);
+    digitalWrite(4,LOW);
 }
 
 void wakeAnimation() {
