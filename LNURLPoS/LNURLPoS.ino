@@ -14,8 +14,8 @@
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-String baseURL = "https://legend.lnbits.com/lnurlpos/api/v1/lnurl/PESRKMbNXkfhYgwRxUz2of";
-String key = "YSzNpCCWStxPnjv244eaBr";
+String baseURL = "https://legend.lnbits.com/lnurlpos/api/v1/lnurl/UZsLkBSzdDqEFgc3RAs8rj";
+String key = "UzhUjUGFvEtJRaVSpxxNCa";
 String currency = "USD";
 
 //////////////KEYPAD///////////////////
@@ -116,16 +116,13 @@ void setup(void) {
   Serial.begin(115200); 
   pinMode(4,OUTPUT); 
   digitalWrite(4,HIGH);
-  pinMode (2, OUTPUT);
-  digitalWrite(2, HIGH);
   btStop();
   WiFi.mode(WIFI_OFF);
   h.begin();
   tft.begin();
-
+  
   //Set to 3 for bigger keypad
   tft.setRotation(1);
-
   if(bootCount == 0)
   {
     logo();
