@@ -539,14 +539,13 @@ int xor_encrypt(uint8_t * output, size_t outlen, uint8_t * key, size_t keylen, u
   cur++;
   memcpy(output+cur, nonce, nonce_len);
   cur += nonce_len;
-  // payload, unxored first - <pin><currency byte><amount>
-  int payload_len = lenVarInt(pin) + 1 + lenVarInt(amount_in_cents);
+  // payload, unxored first - <pin><amount>
+  int payload_len = lenVarInt(pin) + lenVarInt(amount_in_cents);
   output[cur] = (uint8_t)payload_len;
   cur++;
   uint8_t * payload = output+cur; // pointer to the start of the payload
   cur += writeVarInt(pin, output+cur, outlen-cur); // pin code
   cur += writeVarInt(amount_in_cents, output+cur, outlen-cur); // amount
-  cur++;
   // xor it with round key
   uint8_t hmacresult[32];
   SHA256 h;
