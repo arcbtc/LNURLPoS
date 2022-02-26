@@ -2,9 +2,9 @@
 
 ## Cheap, offline(!), DIY bitcoin lightning-network PoS
 
-![lnurlpos](https://user-images.githubusercontent.com/33088785/134943216-1a9f3ab6-09da-4e15-b16a-2c2f8bc918da.png)
+### for a more up to date version of lnurlpos, checkout <a href="https://github.com/arcbtc/bitcoinPoS">bitcoinPoS</a>
 
-> for a more up to date version of lnurlpos, checkout <a href="https://github.com/arcbtc/bitcoinPoS">bitcoinPoS</a>
+![lnurlpos](https://user-images.githubusercontent.com/33088785/134943216-1a9f3ab6-09da-4e15-b16a-2c2f8bc918da.png)
 
 Lightning-network uses hot wallets and real-world payments are made from phones. The burden of connectivity can be taken away from the point-of-sale and given to the phone.
 
