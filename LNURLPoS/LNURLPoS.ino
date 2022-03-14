@@ -17,12 +17,12 @@
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
 ////////////////////////////////////////////////////////
 
-String baseURL = "https://lnbits.anchorhodl.com/lnurlpos/api/v1/lnurl/2XcN4QN4HfdEN54f2WGeC5";
-String key = "KNoSdgqR9NyrYx4owBuQGa";
-String currency = "sats";
+String baseURL = "https://legend.lnbits.com/lnurlpos/api/v1/lnurl/UZsLkBSzdDqEFgc3RAs8rj";
+String key = "UzhUjUGFvEtJRaVSpxxNCa";
+String currency = "USD";
 
 //////////////KEYPAD///////////////////
-bool isLilyGoKeyboard = true;
+bool isLilyGoKeyboard = false;
 
 //////////////SLEEP SETTINGS///////////////////
 bool isSleepEnabled = true;
@@ -99,16 +99,16 @@ char keys[rows][cols] = {
 //byte colPins[cols] = {17, 22, 21}; //connect to the column pinouts of the keypad
 
 //LilyGO T-Display-Keyboard
-byte rowPins[rows] = {21, 27, 26, 22}; //connect to the row pinouts of the keypad
-byte colPins[cols] = {33, 32, 25}; //connect to the column pinouts of the keypad
+//byte rowPins[rows] = {21, 27, 26, 22}; //connect to the row pinouts of the keypad
+//byte colPins[cols] = {33, 32, 25}; //connect to the column pinouts of the keypad
 
 // 4 x 4 keypad setup
 //byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
 //byte colPins[cols] = {15, 13, 12}; //connect to the column pinouts of the keypad
 
 //Small keypad setup
-//byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
-//byte colPins[cols] = {15, 13, 12};    //connect to the column pinouts of the keypad
+byte rowPins[rows] = {21, 22, 17, 2}; //connect to the row pinouts of the keypad
+byte colPins[cols] = {15, 13, 12};    //connect to the column pinouts of the keypad
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, rows, cols);
 int checker = 0;
@@ -117,7 +117,7 @@ char maxdig[20];
 //////////////MAIN///////////////////
 
 void setup(void) {
-  Serial.begin(9600);  
+  Serial.begin(115200);  
   pinMode (2, OUTPUT);
   digitalWrite(2, HIGH);
   btStop();
@@ -128,12 +128,12 @@ void setup(void) {
   //Set to 3 for bigger keypad
   tft.setRotation(1);
 
-    Serial.println("mounting FS...");
+  Serial.println("mounting FS...");
     
   while(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)){
     Serial.println("failed to mount FS");
     delay(200);
-   }
+  }
 
   loadConfig();  
 
@@ -236,10 +236,10 @@ void adjustQrBrightness(String direction)
   
   qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
   qrShowCode();
-  
-        File configFile = SPIFFS.open("/config.txt", "w");
-      configFile.print(String(qrScreenBrightness));
-      configFile.close();
+
+  File configFile = SPIFFS.open("/config.txt", "w");
+  configFile.print(String(qrScreenBrightness));
+  configFile.close();
 }
 
 ///////////DISPLAY///////////////
