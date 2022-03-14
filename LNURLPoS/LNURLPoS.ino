@@ -1,10 +1,13 @@
+/////////////////////////////////////////////////////////////////////////////////
+//////WARNING! WE ADVISE SWITCHING TO https://github.com/arcbtc/bitcoinPoS///////
+/////////////////////////////////////////////////////////////////////////////////
 
 #include "SPI.h"
 #include "FS.h"
 #include "TFT_eSPI.h"
 #include <Keypad.h>
 #include <string.h>
-#include "qrcode.h"
+#include "qrcoded.h"
 #include "Bitcoin.h"
 #include <Hash.h>
 #include <Conversion.h>
@@ -33,8 +36,8 @@ int qrScreenBrightness = 180; // 0 = min, 255 = max
 
 //////////////BATTERY///////////////////
 const bool shouldDisplayBatteryLevel = false; // Display the battery level on the display?
-const float batteryMaxVoltage = 4.2; // The maximum battery voltage. Used for battery percentage calculation
-const float batteryMinVoltage = 3.73; // The minimum battery voltage that we tolerate before showing the warning
+const float batteryMaxVoltage = 4.2;          // The maximum battery voltage. Used for battery percentage calculation
+const float batteryMinVoltage = 3.73;         // The minimum battery voltage that we tolerate before showing the warning
 
 ////////////////////////////////////////////////////////
 ////Note: See lines 75, 97, to adjust to keypad size////
@@ -116,10 +119,11 @@ char maxdig[20];
 
 //////////////MAIN///////////////////
 
-void setup(void) {
-  Serial.begin(115200);  
-  pinMode (2, OUTPUT);
-  digitalWrite(2, HIGH);
+void setup(void)
+{
+  Serial.begin(115200);
+  pinMode(4, OUTPUT);
+  digitalWrite(4, HIGH);
   btStop();
   WiFi.mode(WIFI_OFF);
   h.begin();
@@ -150,14 +154,17 @@ void setup(void) {
   Serial.println("Boot count" + bootCount);
 }
 
-void loop() {
+void loop()
+{
+  digitalWrite(4, HIGH);
   maybeSleepDevice();
   inputs = "";
   settle = false;
   displaySats();
   bool cntr = false;
 
-  while (cntr != true){
+  while (cntr != true)
+  {
     maybeSleepDevice();
     displayBatteryVoltage(false);
     char key = keypad.getKey();
@@ -166,29 +173,35 @@ void loop() {
       isPretendSleeping = false;
       timeOfLastInteraction = millis();
       virtkey = String(key);
-      if (virtkey == "#"){
+      if (virtkey == "#")
+      {
         makeLNURL();
         qrShowCode();
         int counta = 0;
-        while (settle != true){
+        while (settle != true)
+        {
           virtkey = String(keypad.getKey());
-          if (virtkey == "*"){
+          if (virtkey == "*")
+          {
             timeOfLastInteraction = millis();
             tft.fillScreen(TFT_BLACK);
             settle = true;
             cntr = true;
           }
-          else if (virtkey == "#"){
+          else if (virtkey == "#")
+          {
             timeOfLastInteraction = millis();
             showPin();
           }
           // Handle screen brighten on QR screen
-          else if (virtkey == "1"){
+          else if (virtkey == "1")
+          {
             timeOfLastInteraction = millis();
             adjustQrBrightness("increase");
           }
           // Handle screen dim on QR screen
-          else if (virtkey == "4"){
+          else if (virtkey == "4")
+          {
             timeOfLastInteraction = millis();
             adjustQrBrightness("decrease");
           }
@@ -228,12 +241,12 @@ void adjustQrBrightness(String direction)
   {
     qrScreenBrightness = qrScreenBrightness - 25;
   }
-  
+
   if (qrScreenBrightness < 4)
   {
     qrScreenBrightness = 4;
   }
-  
+
   qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
   qrShowCode();
 
@@ -249,15 +262,15 @@ void qrShowCode()
   tft.fillScreen(qrScreenBgColour);
   lnurl.toUpperCase();
   const char *lnurlChar = lnurl.c_str();
-  QRCode qrcode;
+  QRCode qrcoded;
   uint8_t qrcodeData[qrcode_getBufferSize(20)];
-  qrcode_initText(&qrcode, qrcodeData, 6, 0, lnurlChar);
-  for (uint8_t y = 0; y < qrcode.size; y++)
+  qrcode_initText(&qrcoded, qrcodeData, 6, 0, lnurlChar);
+  for (uint8_t y = 0; y < qrcoded.size; y++)
   {
     // Each horizontal module
-    for (uint8_t x = 0; x < qrcode.size; x++)
+    for (uint8_t x = 0; x < qrcoded.size; x++)
     {
-      if (qrcode_getModule(&qrcode, x, y))
+      if (qrcode_getModule(&qrcoded, x, y))
       {
         tft.fillRect(60 + 3 * x, 5 + 3 * y, 3, 3, TFT_BLACK);
       }
@@ -277,7 +290,7 @@ void showPin()
   tft.setCursor(30, 25);
   tft.println("PAYMENT PROOF PIN");
   tft.setCursor(60, 80);
-  tft.setTextColor(TFT_PURPLE, TFT_BLACK); 
+  tft.setTextColor(TFT_PURPLE, TFT_BLACK);
   tft.setFreeFont(BIGFONT);
   tft.println(randomPin);
 }
@@ -294,14 +307,14 @@ void displaySats()
   tft.println("TO RESET PRESS *");
 
   inputs += virtkey;
-  
+
   tft.setFreeFont(MIDFONT);
   tft.setCursor(0, 80);
   tft.print(String(currency) + ":");
   tft.setFreeFont(MIDBIGFONT);
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
 
-  if(currency != "sats")
+  if (currency != "sats")
   {
     float amount = float(inputs.toInt()) / 100;
     tft.println(amount);
@@ -351,15 +364,10 @@ void displayBatteryVoltage(bool forceUpdate)
 {
   long currentTime = millis();
   if (
-    (shouldDisplayBatteryLevel
-    &&
-    (currentTime > (lastBatteryUpdate + batteryLevelUpdatePeriod * 1000))
-    &&
-    !isPoweredExternally()
-    )
-    ||
-    (shouldDisplayBatteryLevel && forceUpdate && !isPoweredExternally())
-    )
+      (shouldDisplayBatteryLevel &&
+       (currentTime > (lastBatteryUpdate + batteryLevelUpdatePeriod * 1000)) &&
+       !isPoweredExternally()) ||
+      (shouldDisplayBatteryLevel && forceUpdate && !isPoweredExternally()))
   {
     lastBatteryUpdate = currentTime;
     bool showBatteryVoltage = false;
@@ -369,12 +377,14 @@ void displayBatteryVoltage(bool forceUpdate)
 
     int batteryPercentage = (int)(batteryCurVAboveMin / batteryAllowedRange * 100);
 
-    if(batteryPercentage > 100) {
+    if (batteryPercentage > 100)
+    {
       batteryPercentage = 100;
     }
 
     int textColour = TFT_GREEN;
-    if (batteryPercentage > 70) {
+    if (batteryPercentage > 70)
+    {
       textColour = TFT_GREEN;
     }
     else if (batteryPercentage > 30)
@@ -390,7 +400,8 @@ void displayBatteryVoltage(bool forceUpdate)
     tft.setFreeFont(SMALLFONT);
 
     int textXPos = 195;
-    if(batteryPercentage < 100) {
+    if (batteryPercentage < 100)
+    {
       textXPos = 200;
     }
 
@@ -399,18 +410,22 @@ void displayBatteryVoltage(bool forceUpdate)
     tft.setCursor(textXPos, 16);
 
     // Is the device charging?
-    if(isPoweredExternally()) {
+    if (isPoweredExternally())
+    {
       tft.print("CHRG");
     }
     // Show the current voltage
-    if(batteryPercentage > 10) {
+    if (batteryPercentage > 10)
+    {
       tft.print(String(batteryPercentage) + "%");
     }
-    else {
+    else
+    {
       tft.print("LO!");
     }
 
-    if(showBatteryVoltage) {
+    if (showBatteryVoltage)
+    {
       tft.setFreeFont(SMALLFONT);
       tft.setCursor(155, 36);
       tft.print(String(batteryCurV) + "v");
@@ -422,21 +437,29 @@ void displayBatteryVoltage(bool forceUpdate)
  * Check whether the device should be put to sleep and put it to sleep
  * if it should
  */
-void maybeSleepDevice() {
-  if(isSleepEnabled && !isPretendSleeping) {
+void maybeSleepDevice()
+{
+  if (isSleepEnabled && !isPretendSleeping)
+  {
     long currentTime = millis();
-    if(currentTime > (timeOfLastInteraction + sleepTimer * 1000)) {
+    if (currentTime > (timeOfLastInteraction + sleepTimer * 1000))
+    {
       sleepAnimation();
       // The device wont charge if it is sleeping, so when charging, do a pretend sleep
-      if(isPoweredExternally()) {
+      if (isPoweredExternally())
+      {
         Serial.println("Pretend sleep now");
         isPretendSleeping = true;
         tft.fillScreen(TFT_BLACK);
       }
-      else {
-        if(isLilyGoKeyboard) {
-          esp_sleep_enable_ext0_wakeup(GPIO_NUM_33,1); //1 = High, 0 = Low
-        } else {
+      else
+      {
+        if (isLilyGoKeyboard)
+        {
+          esp_sleep_enable_ext0_wakeup(GPIO_NUM_33, 1); //1 = High, 0 = Low
+        }
+        else
+        {
           //Configure Touchpad as wakeup source
           touchAttachInterrupt(T3, callback, 40);
           esp_sleep_enable_touchpad_wakeup();
@@ -448,34 +471,38 @@ void maybeSleepDevice() {
   }
 }
 
-void callback(){
+void callback()
+{
 }
 
 /**
  * Awww. Show the go to sleep animation
  */
-void sleepAnimation() {
-    printSleepAnimationFrame("(o.o)", 500);
-    printSleepAnimationFrame("(-.-)", 500);
-    printSleepAnimationFrame("(-.-)z", 250);
-    printSleepAnimationFrame("(-.-)zz", 250);
-    printSleepAnimationFrame("(-.-)zzz", 250);
-    tft.fillScreen(TFT_BLACK);
+void sleepAnimation()
+{
+  printSleepAnimationFrame("(o.o)", 500);
+  printSleepAnimationFrame("(-.-)", 500);
+  printSleepAnimationFrame("(-.-)z", 250);
+  printSleepAnimationFrame("(-.-)zz", 250);
+  printSleepAnimationFrame("(-.-)zzz", 250);
+  digitalWrite(4, LOW);
 }
 
-void wakeAnimation() {
-    printSleepAnimationFrame("(-.-)", 100);
-    printSleepAnimationFrame("(o.o)", 200);
-    tft.fillScreen(TFT_BLACK);
+void wakeAnimation()
+{
+  printSleepAnimationFrame("(-.-)", 100);
+  printSleepAnimationFrame("(o.o)", 200);
+  tft.fillScreen(TFT_BLACK);
 }
 
 /**
  * Print the line of the animation
  */
-void printSleepAnimationFrame(String text, int wait) {
+void printSleepAnimationFrame(String text, int wait)
+{
   tft.fillScreen(TFT_BLACK);
   tft.setCursor(5, 80);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK); 
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setFreeFont(BIGFONT);
   tft.println(text);
   delay(wait);
@@ -484,18 +511,20 @@ void printSleepAnimationFrame(String text, int wait) {
 /**
  * Get the voltage going to the device
  */
-float getInputVoltage() {
-    delay(100);
-    uint16_t v1 = analogRead(34);
-    return ((float)v1 / 4095.0f) * 2.0f * 3.3f * (1100.0f / 1000.0f);
+float getInputVoltage()
+{
+  delay(100);
+  uint16_t v1 = analogRead(34);
+  return ((float)v1 / 4095.0f) * 2.0f * 3.3f * (1100.0f / 1000.0f);
 }
 
 /**
  * Does the device have external or internal power?
  */
-bool isPoweredExternally() {
+bool isPoweredExternally()
+{
   float inputVoltage = getInputVoltage();
-  if(inputVoltage > 4.5)
+  if (inputVoltage > 4.5)
   {
     return true;
   }
@@ -503,7 +532,6 @@ bool isPoweredExternally() {
   {
     return false;
   }
-  
 }
 
 /**
@@ -560,10 +588,12 @@ void makeLNURL()
  * Currency byte is '$' for USD cents, 's' for satoshi, 'E' for euro cents.
  * Returns number of bytes written to the output, 0 if error occured.
  */
-int xor_encrypt(uint8_t * output, size_t outlen, uint8_t * key, size_t keylen, uint8_t * nonce, size_t nonce_len, uint64_t pin, uint64_t amount_in_cents){
+int xor_encrypt(uint8_t *output, size_t outlen, uint8_t *key, size_t keylen, uint8_t *nonce, size_t nonce_len, uint64_t pin, uint64_t amount_in_cents)
+{
   // check we have space for all the data:
   // <variant_byte><len|nonce><len|payload:{pin}{amount}><hmac>
-  if(outlen < 2 + nonce_len + 1 + lenVarInt(pin) + 1 + lenVarInt(amount_in_cents) + 8){
+  if (outlen < 2 + nonce_len + 1 + lenVarInt(pin) + 1 + lenVarInt(amount_in_cents) + 8)
+  {
     return 0;
   }
   int cur = 0;
@@ -572,15 +602,15 @@ int xor_encrypt(uint8_t * output, size_t outlen, uint8_t * key, size_t keylen, u
   // nonce_len | nonce
   output[cur] = nonce_len;
   cur++;
-  memcpy(output+cur, nonce, nonce_len);
+  memcpy(output + cur, nonce, nonce_len);
   cur += nonce_len;
   // payload, unxored first - <pin><currency byte><amount>
   int payload_len = lenVarInt(pin) + 1 + lenVarInt(amount_in_cents);
   output[cur] = (uint8_t)payload_len;
   cur++;
-  uint8_t * payload = output+cur; // pointer to the start of the payload
-  cur += writeVarInt(pin, output+cur, outlen-cur); // pin code
-  cur += writeVarInt(amount_in_cents, output+cur, outlen-cur); // amount
+  uint8_t *payload = output + cur;                                 // pointer to the start of the payload
+  cur += writeVarInt(pin, output + cur, outlen - cur);             // pin code
+  cur += writeVarInt(amount_in_cents, output + cur, outlen - cur); // amount
   cur++;
   // xor it with round key
   uint8_t hmacresult[32];
@@ -589,7 +619,8 @@ int xor_encrypt(uint8_t * output, size_t outlen, uint8_t * key, size_t keylen, u
   h.write((uint8_t *)"Round secret:", 13);
   h.write(nonce, nonce_len);
   h.endHMAC(hmacresult);
-  for(int i=0; i < payload_len; i++){
+  for (int i = 0; i < payload_len; i++)
+  {
     payload[i] = payload[i] ^ hmacresult[i];
   }
   // add hmac to authenticate
@@ -597,7 +628,7 @@ int xor_encrypt(uint8_t * output, size_t outlen, uint8_t * key, size_t keylen, u
   h.write((uint8_t *)"Data:", 5);
   h.write(output, cur);
   h.endHMAC(hmacresult);
-  memcpy(output+cur, hmacresult, 8);
+  memcpy(output + cur, hmacresult, 8);
   cur += 8;
   // return number of bytes written to the output
   return cur;
