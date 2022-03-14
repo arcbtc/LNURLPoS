@@ -3,6 +3,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include "SPI.h"
+#include "FS.h"
 #include "TFT_eSPI.h"
 #include <Keypad.h>
 #include <string.h>
@@ -12,6 +13,8 @@
 #include <Conversion.h>
 #include <WiFi.h>
 #include "esp_adc_cal.h"
+#include "SPIFFS.h"
+
 
 ////////////////////////////////////////////////////////
 ////////CHANGE! USE LNURLPoS EXTENSION IN LNBITS////////
@@ -76,6 +79,7 @@ bool isPretendSleeping = false;
 #define MIDFONT &FreeMonoBold12pt7b
 #define SMALLFONT &FreeMonoBold9pt7b
 #define TINYFONT &TomThumb
+#define FORMAT_SPIFFS_IF_FAILED true
 
 TFT_eSPI tft = TFT_eSPI();
 SHA256 h;
@@ -127,7 +131,17 @@ void setup(void)
 
   //Set to 3 for bigger keypad
   tft.setRotation(1);
-  if (bootCount == 0)
+
+  Serial.println("mounting FS...");
+    
+  while(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)){
+    Serial.println("failed to mount FS");
+    delay(200);
+  }
+
+  loadConfig();  
+
+  if(bootCount == 0)
   {
     logo();
     delay(3000);
@@ -235,6 +249,10 @@ void adjustQrBrightness(String direction)
 
   qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
   qrShowCode();
+
+  File configFile = SPIFFS.open("/config.txt", "w");
+  configFile.print(String(qrScreenBrightness));
+  configFile.close();
 }
 
 ///////////DISPLAY///////////////
@@ -514,6 +532,24 @@ bool isPoweredExternally()
   {
     return false;
   }
+}
+
+/**
+ * Load stored config values
+ */
+void loadConfig() {
+  File file = SPIFFS.open("/config.txt");
+   spiffing = file.readStringUntil('\n');
+  String tempQrScreenBrightness = spiffing.c_str();
+  int tempQrScreenBrightnessInt = tempQrScreenBrightness.toInt();
+  Serial.println("spiffcontent " + String(tempQrScreenBrightnessInt));
+  file.close();
+
+  if(tempQrScreenBrightnessInt && tempQrScreenBrightnessInt > 3) {
+    qrScreenBrightness = tempQrScreenBrightnessInt;
+  }
+  Serial.println("qrScreenBrightness from config " + String(qrScreenBrightness));
+  qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
 }
 
 //////////LNURL AND CRYPTO///////////////
