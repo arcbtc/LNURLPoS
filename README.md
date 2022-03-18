@@ -93,7 +93,7 @@ This is the data in that QR code:
 
 If we decode the LNURL we get this URL:
 
-`https://lnbits.com/lnurlp/api/v1/lnurl/838`
+`https://legend.lnbits.com/lnurlp/api/v1/lnurl/838`
 
 If you do a GET request to the URL this data will be returned (you can test this by just visiting the URL in a browser):
 
